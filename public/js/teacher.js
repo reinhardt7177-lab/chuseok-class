@@ -188,13 +188,32 @@ function paintCut(cut) {
     case 'wall': {
       wide();
       const w = snap?.wishes ?? [];
+      /* 소원 하나에 달 하나. 너무 많으면 글씨가 작아져 못 읽으므로 최근 것부터 띄운다. */
+      const moons = [...w].reverse().slice(0, MOON_MAX);
+
       host.innerHTML = `
         <p class="cut__lead">🌙 우리 반 소원 <span class="cut__count">${w.length}개</span></p>
-        <div class="wallgrid">${w.length
-          ? [...w].reverse().slice(0, 18).map((x) =>
-              `<div class="wallcard">${x.forWhom === 'us' ? '🤝' : '🙋'} ${esc(x.text)}
-                 <em>${esc(x.name)}</em></div>`).join('')
-          : '<p class="cut__wait">학생들이 소원을 보내면 여기에 뜹니다</p>'}</div>`;
+        <div class="wishwrap">
+          <div class="wishsky" data-many="${moons.length > 8 ? 'yes' : 'no'}">
+            ${moons.length
+              ? moons.map((x, i) => `
+                  <div class="moonwish ${x.forWhom === 'us' ? 'is-us' : ''}"
+                       style="--i:${i}; --drift:${(6 + (i % 5) * 1.3).toFixed(1)}s">
+                    <span class="moonwish__text">${esc(x.text)}</span>
+                    <span class="moonwish__name">${esc(x.name)}</span>
+                  </div>`).join('')
+              : '<p class="cut__wait">학생이 소원을 보내면 달이 하나씩 떠오릅니다</p>'}
+          </div>
+
+          <div class="joinbox">
+            <p class="joinbox__lead">여기로 들어와<br>소원을 적어요</p>
+            <div class="joinbox__qr">${connect?.qr
+              ? `<img src="${connect.qr}" alt="소원 적기 접속 QR 코드">`
+              : '<span>주소를 부르는 중…</span>'}</div>
+            ${connect?.standalone ? '' : `<p class="joinbox__code">${connect?.code ?? '------'}</p>`}
+            <p class="joinbox__note">보내면 내 달이 떠올라요</p>
+          </div>
+        </div>`;
       break;
     }
 
@@ -219,14 +238,36 @@ function paintCut(cut) {
       wide();
       const here = (snap?.students ?? []).filter((x) => x.online);
       host.innerHTML = `
-        <p class="cut__lead">🙋 다 모였나요?</p>
-        <div class="lobby">
-          <div class="lobby__count"><b>${here.length}</b><span>명 들어왔어요</span></div>
-          <div class="lobby__names">${here.length
-            ? here.map((x) => `<span class="lobby__name">${esc(x.name)}</span>`).join('')
-            : '<p class="cut__wait">학생이 들어오면 이름이 하나씩 나타납니다</p>'}</div>
-          <p class="lobby__note">모두 이름이 보이면 시작하세요 · 문제는 모두 ${cut.total}개입니다</p>
+        <p class="cut__lead">🙋 다 모였나요? <span class="cut__count">${here.length}명</span></p>
+        <div class="wishwrap">
+          <div class="lobby">
+            <div class="lobby__names">${here.length
+              ? here.map((x, i) => `<span class="lobby__name" style="--i:${i}">${esc(x.name)}</span>`).join('')
+              : '<p class="cut__wait">QR을 찍고 들어오면 이름이 하나씩 나타납니다</p>'}</div>
+            <button class="btn btn--primary btn--lg" id="quizGo" ${here.length ? '' : 'disabled'}>
+              퀴즈 시작 ▶
+            </button>
+            <p class="lobby__note">문제는 모두 ${cut.total}개입니다</p>
+          </div>
+
+          <div class="joinbox">
+            <p class="joinbox__lead">여기로 들어와<br>퀴즈에 참여해요</p>
+            <div class="joinbox__qr">${connect?.qr
+              ? `<img src="${connect.qr}" alt="퀴즈 접속 QR 코드">`
+              : '<span>주소를 부르는 중…</span>'}</div>
+            ${connect?.standalone ? '' : `<p class="joinbox__code">${connect?.code ?? '------'}</p>`}
+            <p class="joinbox__note">들어오면 이름이 왼쪽에 떠요</p>
+          </div>
         </div>`;
+
+      /* 대기실에서 바로 첫 문제로 — 넘기고 또 여는 두 번 수고를 없앤다 */
+      host.querySelector('#quizGo').onclick = () => {
+        step(1);
+        const first = currentBeats()[state.beat];
+        if (first?.kind !== 'quiz') return;
+        const opts = first.q.type === 'ox' ? 2 : first.q.options.length;
+        live('open', { index: first.qIndex, questionId: first.q.id, choiceCount: opts, limitMs: 20000, total: first.total });
+      };
       break;
     }
 
@@ -291,6 +332,9 @@ function paintCut(cut) {
       host.innerHTML = '';
   }
 }
+
+/** 한 화면에 띄울 달의 최대 수 — 이보다 많으면 글씨가 작아져 못 읽는다 */
+const MOON_MAX = 14;
 
 /* ═══════════════ 라이브 퀴즈 ═══════════════ */
 
@@ -375,10 +419,11 @@ function paintDots(list) {
 function paintSteps() {
   const all = [...SECTIONS.map((s) => ({ icon: s.icon, label: s.subtitle })),
                { icon: '🙋', label: '학생 활동' }];
+  /* 그림 없이 글자만. 멀리서 보고 누르는 단추라 이름이 커야 한다. */
   $('steps').innerHTML = all.map((s, i) =>
     `<button class="step ${i < state.index ? 'done' : ''}" data-go="${i}"
              aria-current="${i === state.index}" title="${esc(s.label)}">
-       <em>${s.icon}</em><small>${esc(s.label)}</small>
+       <span>${esc(s.label)}</span>
      </button>`).join('');
 }
 
@@ -410,7 +455,14 @@ function goto(i, beat = 0) {
 function step(dir) {
   const count = currentBeats().length;
   const next = state.beat + dir;
-  if (next >= 0 && next < count) { state.beat = next; paint(); return; }
+  if (next >= 0 && next < count) {
+    state.beat = next;
+    paint();
+    /* 컷만 넘겨도 서버에 알려야 한다. 활동을 여는 컷이 있어서,
+       여기서 안 보내면 학생 화면에 소원 칸이 안 뜬다. */
+    pushState();
+    return;
+  }
   if (dir > 0 && state.index < LAST) return goto(state.index + 1);
   if (dir < 0 && state.index > 0) return goto(state.index - 1, 'last');
 }
@@ -459,7 +511,9 @@ async function pushState() {
         key: roomKey,
         band: state.band,
         sectionId: isLast() ? 'student' : section().id,
-        activityOpen: isLast(),          // 마지막 단계에서 학생 활동이 열린다
+        /* 마지막 단계는 물론이고, 소원 달 컷에서도 학생 칸을 연다.
+           그 화면의 QR로 들어온 아이가 바로 소원을 적을 수 있어야 한다. */
+        activityOpen: isLast() || currentBeats()[state.beat]?.kind === 'wall',
         studentsFollow: true,
       }),
     });
@@ -516,6 +570,7 @@ document.addEventListener('click', (e) => {
 
   const dot = e.target.closest('[data-beat]');
   if (dot) { state.beat = Number(dot.dataset.beat); return paint(); }
+    pushState();
 
   const go = e.target.closest('[data-go]');
   if (go) return goto(Number(go.dataset.go));

@@ -71,7 +71,7 @@ const MARK = {
 export const HOLIDAYS = [
   {
     id: 'seollal', name: '설날', when: '음력 1월 1일', big: true,
-    tint: '#e4703a', mark: MARK.tteokguk,
+    tint: '#e4703a', img: 'assets/img/holiday-seollal.jpg',
     tag: '한 살을 더 먹는 날',
     food: '떡국', play: '윷놀이 · 연날리기',
     body: '한 해가 시작되는 날이에요. 떡국을 한 그릇 먹으면 한 살을 더 먹는다고 했지요. '
@@ -79,7 +79,7 @@ export const HOLIDAYS = [
   },
   {
     id: 'daeboreum', name: '정월대보름', when: '음력 1월 15일',
-    tint: '#f2c96b', mark: MARK.daljip,
+    tint: '#f2c96b', img: 'assets/img/holiday-daeboreum.jpg',
     tag: '새해 첫 보름달',
     food: '오곡밥 · 부럼', play: '달집태우기 · 쥐불놀이',
     body: '새해 들어 처음 뜨는 보름달을 보는 날이에요. 딱딱한 부럼을 깨물어 한 해 건강을 빌고, '
@@ -87,7 +87,7 @@ export const HOLIDAYS = [
   },
   {
     id: 'hansik', name: '한식', when: '양력 4월 5일 무렵', big: true,
-    tint: '#7fc4a4', mark: MARK.seongmyo,
+    tint: '#7fc4a4', img: 'assets/img/holiday-hansik.jpg',
     tag: '불을 쓰지 않는 날',
     food: '찬 음식', play: '성묘 · 나무 심기',
     body: '동지에서 백다섯째 되는 날이에요. 이날은 불을 피우지 않아 찬 음식을 먹었어요. '
@@ -95,7 +95,7 @@ export const HOLIDAYS = [
   },
   {
     id: 'samjinnal', name: '삼짇날', when: '음력 3월 3일',
-    tint: '#f2a273', mark: MARK.jebi,
+    tint: '#f2a273', img: 'assets/img/holiday-samjinnal.jpg',
     tag: '제비가 돌아오는 날',
     food: '진달래 화전', play: '풀각시 놀이',
     body: '강남 갔던 제비가 돌아온다는 날이에요. 산에 핀 진달래꽃을 따다 반죽 위에 올려 '
@@ -103,7 +103,7 @@ export const HOLIDAYS = [
   },
   {
     id: 'dano', name: '단오', when: '음력 5월 5일', big: true,
-    tint: '#4a9b78', mark: MARK.geune,
+    tint: '#4a9b78', pos: "38% center", img: 'assets/img/holiday-dano.jpg',
     tag: '여름을 맞이하는 날',
     food: '수리취떡', play: '그네뛰기 · 씨름',
     body: '모내기를 끝내고 한 해 농사가 잘되기를 비는 날이에요. 창포물에 머리를 감고, '
@@ -111,7 +111,7 @@ export const HOLIDAYS = [
   },
   {
     id: 'chilseok', name: '칠석', when: '음력 7월 7일',
-    tint: '#9db8e8', mark: MARK.chilseok,
+    tint: '#9db8e8', pos: "center 42%", img: 'assets/img/holiday-chilseok.jpg',
     tag: '견우와 직녀가 만나는 날',
     food: '밀전병 · 호박전', play: '별 보기',
     body: '일 년에 딱 하루, 은하수 양쪽에 떨어져 있던 견우와 직녀가 까치와 까마귀가 놓아 준 '
@@ -130,7 +130,7 @@ export const HOLIDAYS = [
 
   {
     id: 'jungyang', name: '중양절', when: '음력 9월 9일',
-    tint: '#e0a458', mark: MARK.gukhwa,
+    tint: '#e0a458', pos: "72% center", img: 'assets/img/holiday-jungyang.jpg',
     tag: '국화가 한창인 날',
     food: '국화전 · 국화주', play: '단풍놀이',
     body: '좋은 숫자인 9가 두 번 겹치는 날이에요. 산에 올라 단풍을 보고, 노랗게 핀 국화를 '
@@ -138,7 +138,7 @@ export const HOLIDAYS = [
   },
   {
     id: 'dongji', name: '동지', when: '양력 12월 22일 무렵',
-    tint: '#d9534f', mark: MARK.patjuk,
+    tint: '#d9534f', img: 'assets/img/holiday-dongji.jpg',
     tag: '밤이 가장 긴 날',
     food: '팥죽', play: '달력 나누기',
     body: '한 해에서 밤이 가장 긴 날이에요. 붉은 팥죽을 쑤어 나쁜 기운을 쫓았고, '

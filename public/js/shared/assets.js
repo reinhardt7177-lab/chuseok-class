@@ -1194,6 +1194,28 @@ export const ASSETS = [
     "h": 864
   },
   {
+    "id": "byeongpung",
+    "section": "ui",
+    "role": "ui",
+    "scene": "차례상 뒤 병풍",
+    "motion": "still",
+    "layers": [],
+    "kw": [],
+    "w": 1536,
+    "h": 864
+  },
+  {
+    "id": "ritual-table",
+    "section": "ui",
+    "role": "ui",
+    "scene": "차례상 상판",
+    "motion": "still",
+    "layers": [],
+    "kw": [],
+    "w": 1536,
+    "h": 864
+  },
+  {
     "id": "student-welcome",
     "section": "ui",
     "role": "ui",
@@ -1245,6 +1267,102 @@ export const ASSETS = [
     "kw": [],
     "w": 1024,
     "h": 1024
+  },
+  {
+    "id": "holiday-seollal",
+    "section": "holiday",
+    "role": "card",
+    "scene": "설날",
+    "motion": "kenburns-in",
+    "layers": [],
+    "kw": [],
+    "w": 1408,
+    "h": 640
+  },
+  {
+    "id": "holiday-daeboreum",
+    "section": "holiday",
+    "role": "card",
+    "scene": "정월대보름",
+    "motion": "float",
+    "layers": [
+      "sparks"
+    ],
+    "kw": [],
+    "w": 1408,
+    "h": 640
+  },
+  {
+    "id": "holiday-hansik",
+    "section": "holiday",
+    "role": "card",
+    "scene": "한식",
+    "motion": "pan-right",
+    "layers": [],
+    "kw": [],
+    "w": 1408,
+    "h": 640
+  },
+  {
+    "id": "holiday-samjinnal",
+    "section": "holiday",
+    "role": "card",
+    "scene": "삼짇날",
+    "motion": "sway",
+    "layers": [],
+    "kw": [],
+    "w": 1408,
+    "h": 640
+  },
+  {
+    "id": "holiday-dano",
+    "section": "holiday",
+    "role": "card",
+    "scene": "단오",
+    "motion": "sway",
+    "layers": [],
+    "kw": [],
+    "w": 1408,
+    "h": 640
+  },
+  {
+    "id": "holiday-chilseok",
+    "section": "holiday",
+    "role": "card",
+    "scene": "칠석",
+    "motion": "float",
+    "layers": [
+      "moonlight"
+    ],
+    "kw": [],
+    "w": 1408,
+    "h": 640
+  },
+  {
+    "id": "holiday-jungyang",
+    "section": "holiday",
+    "role": "card",
+    "scene": "중양절",
+    "motion": "kenburns-in",
+    "layers": [
+      "leaves"
+    ],
+    "kw": [],
+    "w": 1408,
+    "h": 640
+  },
+  {
+    "id": "holiday-dongji",
+    "section": "holiday",
+    "role": "card",
+    "scene": "동지",
+    "motion": "float",
+    "layers": [
+      "steam"
+    ],
+    "kw": [],
+    "w": 1408,
+    "h": 640
   }
 ];
 

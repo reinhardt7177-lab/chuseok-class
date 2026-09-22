@@ -181,20 +181,27 @@ body { overflow: hidden; }
 .steps { display: flex; gap: 5px; flex: 1; min-width: 0; }
 .step {
   flex: 1;
-  height: 40px;
+  min-width: 0;
+  height: 44px;
+  padding: 0 6px;
   border-radius: var(--r-sm);
   background: rgba(246, 236, 210, .07);
   border: 1px solid transparent;
   color: var(--moon-dim);
-  font-size: 11.5px;
-  display: flex; flex-direction: column;
+  font-family: var(--font-title);
+  font-size: clamp(12px, 1.05vw, 16px);
+  font-weight: 700;
+  display: flex;
   align-items: center; justify-content: center;
-  gap: 1px;
   overflow: hidden;
   transition: background .18s, color .18s, border-color .18s;
 }
-.step em { font-style: normal; font-size: 14px; }
-.step small { font-size: 9.5px; opacity: .7; white-space: nowrap; }
+/* 이름이 길어도 한 줄로 — 자리가 모자라면 끝을 줄임표로 */
+.step span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .step:hover { background: rgba(246, 236, 210, .14); color: var(--moon); }
 .step[aria-current="true"] {
   background: linear-gradient(135deg, var(--persimmon), #c9582a);
@@ -225,8 +232,8 @@ body { overflow: hidden; }
    1100px 아래에서는 단계 이름을 빼고 그림만 남겨 한 줄에 들어가게 한다.
    이걸 안 하면 이름들이 가로로 밀려 '학생 활동'과 인원수가 잘려 나간다. */
 @media (max-width: 1100px) {
-  .step small { display: none; }
-  .step { height: 36px; }
+  /* 이름을 숨기면 빈 단추만 남는다. 글자를 줄이고 자리를 좁힌다. */
+  .step { height: 38px; padding: 0 4px; font-size: clamp(10.5px, 1.5vw, 13px); }
   .clock { min-width: auto; font-size: 13px; }
   .bar { gap: var(--s3); padding: var(--s3) var(--s4); }
 }
@@ -500,16 +507,15 @@ body { overflow: hidden; }
 
 /* ─────────────── 라이브 퀴즈 대기실 ─────────────── */
 
-.lobby { display: grid; gap: var(--s5); justify-items: center; text-align: center; }
-
-.lobby__count {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s2);
-  font-family: var(--font-title);
+.lobby {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--s4);
+  text-align: center;
 }
-.lobby__count b { font-size: clamp(54px, 7vw, 92px); color: var(--moon-glow); line-height: 1; }
-.lobby__count span { font-size: clamp(16px, 1.8vw, 22px); color: var(--moon-dim); }
 
 /* 이름이 하나씩 나타난다 — 다 모였는지 눈으로 확인하는 자리 */
 .lobby__names {
@@ -517,7 +523,8 @@ body { overflow: hidden; }
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--s2);
-  max-width: min(1000px, 90vw);
+  max-height: 46vh;
+  overflow: hidden;
 }
 .lobby__name {
   padding: 9px 20px;
@@ -525,11 +532,12 @@ body { overflow: hidden; }
   background: rgba(36, 43, 62, .85);
   border: 1px solid var(--moon-glow);
   color: var(--moon);
-  font-size: clamp(15px, 1.6vw, 21px);
-  animation: pop-in .32s var(--ease) backwards;
+  font-size: clamp(15px, 1.6vw, 22px);
+  animation: pop-in .34s var(--ease) backwards;
+  animation-delay: calc(var(--i, 0) * 45ms);
 }
 @keyframes pop-in { from { opacity: 0; transform: scale(.82); } }
-.lobby__note { margin: 0; font-size: clamp(13px, 1.3vw, 16px); color: var(--moon-dim); }
+.lobby__note { margin: 0; font-size: clamp(12px, 1.2vw, 15px); color: var(--moon-dim); }
 
 /* ─────────────── 시상식 ─────────────── */
 
@@ -577,3 +585,134 @@ body { overflow: hidden; }
 .podium__s--1 .podium__step { height: clamp(74px, 8vw, 116px); }
 .podium__s--2 .podium__step { height: clamp(52px, 5.6vw, 82px); }
 .podium__s--3 .podium__step { height: clamp(38px, 4.2vw, 62px); }
+
+
+/* ─────────────── 소원 달 ───────────────
+   소원 하나에 달 하나. 학생이 보내면 자기 달이 하늘에 떠오른다.
+   오른쪽에는 그 반만의 접속 QR. */
+
+.wishwrap {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 54px);
+  width: 100%;
+}
+
+.wishsky {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 12vw, 176px), 1fr));
+  gap: clamp(8px, 1.2vw, 20px);
+  align-content: center;
+  justify-items: center;
+  max-height: 62vh;
+  overflow: hidden;
+}
+/* 달이 많아지면 한 칸을 줄여 더 많이 담는다 */
+.wishsky[data-many="yes"] {
+  grid-template-columns: repeat(auto-fill, minmax(clamp(104px, 9.5vw, 148px), 1fr));
+}
+
+/* 달 하나 = 소원 하나 */
+.moonwish {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  padding: 14%;
+  text-align: center;
+  color: #4a3410;
+  background: radial-gradient(circle at 36% 32%, #fffbee 0%, #f6dda0 44%, #e6bd6b 74%, #cf9d42 100%);
+  box-shadow: 0 0 26px rgba(242, 201, 107, .38), inset -7px -9px 22px rgba(150, 105, 30, .28);
+  animation:
+    moon-rise .55s var(--ease) backwards,
+    moon-drift var(--drift, 8s) ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * 60ms), calc(var(--i) * 120ms);
+}
+/* 모두를 위한 소원은 옅은 비취빛 달로 — 나를 위한 것과 한눈에 갈린다 */
+.moonwish.is-us {
+  background: radial-gradient(circle at 36% 32%, #f4fffa 0%, #d3efe1 46%, #a9dcc6 76%, #7fc4a4 100%);
+  box-shadow: 0 0 26px rgba(127, 196, 164, .34), inset -7px -9px 22px rgba(40, 100, 76, .22);
+  color: #1f4436;
+}
+
+.moonwish__text {
+  font-size: clamp(10px, .92vw, 14px);
+  line-height: 1.35;
+  font-weight: 700;
+  /* 긴 소원은 다섯 줄까지 — 더 늘면 달 밖으로 샌다 */
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.moonwish__name {
+  font-size: clamp(9px, .78vw, 11.5px);
+  opacity: .62;
+}
+
+@keyframes moon-rise { from { opacity: 0; transform: translateY(18px) scale(.7); } }
+@keyframes moon-drift {
+  from { transform: translateY(-5px); }
+  to   { transform: translateY(6px); }
+}
+
+/* ── 오른쪽: 이 반만의 접속 자리 ── */
+.joinbox {
+  flex: 0 0 auto;
+  display: grid;
+  justify-items: center;
+  gap: var(--s3);
+  text-align: center;
+}
+.joinbox__lead {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(15px, 1.6vw, 22px);
+  line-height: 1.4;
+  color: var(--moon);
+}
+.joinbox__qr {
+  width: clamp(130px, 15vw, 210px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 9px;
+  border-radius: var(--r-md);
+  background: #fff;
+  box-shadow: var(--shadow-lift);
+}
+.joinbox__qr img { width: 100%; display: block; }
+.joinbox__qr span { color: #666; font-size: 13px; }
+
+.joinbox__code {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(28px, 3vw, 46px);
+  letter-spacing: .14em;
+  color: var(--moon-glow);
+  line-height: 1;
+}
+.joinbox__note {
+  margin: 0;
+  font-size: clamp(11.5px, 1.05vw, 14.5px);
+  color: var(--moon-glow);
+}
+
+/* 좁은 화면에서는 접속 자리를 아래로 */
+@media (max-width: 1100px) {
+  .wishwrap { flex-direction: column; gap: var(--s4); }
+  .wishsky { max-height: 40vh; }
+  .joinbox { grid-auto-flow: column; align-items: center; gap: var(--s4); }
+  .joinbox__qr { width: clamp(104px, 18vw, 140px); }
+  .joinbox__lead br { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moonwish { animation: moon-rise .55s var(--ease) backwards; }
+}

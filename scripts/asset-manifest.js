@@ -823,6 +823,112 @@ export const ASSETS = [
       'A simple charming full moon with a tiny rabbit silhouette, centered on a plain deep indigo field, ' +
       'a few small stars around it, very clean minimal composition, gentle glow',
   },
+
+  /* ─────────── 오프닝 벤토: 나머지 여덟 명절 ─────────── */
+  {
+    id: 'holiday-seollal',
+    section: 'holiday',            /* 수업 장면이 아니라 오프닝 벤토 칸에만 쓴다 */
+    role: 'card',
+    scene: '설날',
+    kw: [],                        /* 수업 문장에 끌려 들어가지 않게 비워 둔다 */
+    motion: 'kenburns-in',
+    layers: [],
+    width: 1408,
+    height: 640,
+    prompt:
+      'A warm Korean New Year morning indoors: two small children in bright hanbok bowing deeply on a floor cushion to smiling grandparents seated on a low platform, a steaming bowl of tteokguk rice cake soup on a small wooden table beside them, paper window light, a folded silk pouch resting nearby',
+  },
+  {
+    id: 'holiday-daeboreum',
+    section: 'holiday',            /* 수업 장면이 아니라 오프닝 벤토 칸에만 쓴다 */
+    role: 'card',
+    scene: '정월대보름',
+    kw: [],                        /* 수업 문장에 끌려 들어가지 않게 비워 둔다 */
+    motion: 'float',
+    layers: ['sparks'],
+    width: 1408,
+    height: 640,
+    prompt:
+      'A tall cone of dry pine branches burning bright orange in a dark winter field at night, sparks rising into the sky, an enormous pale full moon low behind it, small villagers silhouetted in a circle watching, snow patches on the ground',
+  },
+  {
+    id: 'holiday-hansik',
+    section: 'holiday',            /* 수업 장면이 아니라 오프닝 벤토 칸에만 쓴다 */
+    role: 'card',
+    scene: '한식',
+    kw: [],                        /* 수업 문장에 끌려 들어가지 않게 비워 둔다 */
+    motion: 'pan-right',
+    layers: [],
+    width: 1408,
+    height: 640,
+    prompt:
+      'A gentle spring hillside in soft morning light with a rounded grassy burial mound, pink azalea bushes blooming around it, a family standing quietly with a small tray of cold food, fresh green grass, distant hills, calm and respectful mood, no fire, no smoke',
+  },
+  {
+    id: 'holiday-samjinnal',
+    section: 'holiday',            /* 수업 장면이 아니라 오프닝 벤토 칸에만 쓴다 */
+    role: 'card',
+    scene: '삼짇날',
+    kw: [],                        /* 수업 문장에 끌려 들어가지 않게 비워 둔다 */
+    motion: 'sway',
+    layers: [],
+    width: 1408,
+    height: 640,
+    prompt:
+      'Early spring by a small Korean stream: two swallows swooping low over the water, pink azalea blossoms on the bank, a plate of hwajeon flower rice cakes with azalea petals pressed on top resting on a flat stone, willow branches with new green leaves',
+  },
+  {
+    id: 'holiday-dano',
+    section: 'holiday',            /* 수업 장면이 아니라 오프닝 벤토 칸에만 쓴다 */
+    role: 'card',
+    scene: '단오',
+    kw: [],                        /* 수업 문장에 끌려 들어가지 않게 비워 둔다 */
+    motion: 'sway',
+    layers: [],
+    width: 1408,
+    height: 640,
+    prompt:
+      'A young woman in a bright hanbok standing on a tall rope swing, swinging high among lush green early-summer trees, her long skirt and hair ribbons streaming in the wind, village children watching from below, blue sky through the leaves',
+  },
+  {
+    id: 'holiday-chilseok',
+    section: 'holiday',            /* 수업 장면이 아니라 오프닝 벤토 칸에만 쓴다 */
+    role: 'card',
+    scene: '칠석',
+    kw: [],                        /* 수업 문장에 끌려 들어가지 않게 비워 둔다 */
+    motion: 'float',
+    layers: ['moonlight'],
+    width: 1408,
+    height: 640,
+    prompt:
+      'A night sky split by a glowing river of stars, hundreds of magpies joining wing to wing to form a bridge across it, two tiny distant figures stepping toward each other from opposite banks, deep indigo sky, soft starlight, tender and quiet',
+  },
+  {
+    id: 'holiday-jungyang',
+    section: 'holiday',            /* 수업 장면이 아니라 오프닝 벤토 칸에만 쓴다 */
+    role: 'card',
+    scene: '중양절',
+    kw: [],                        /* 수업 문장에 끌려 들어가지 않게 비워 둔다 */
+    motion: 'kenburns-in',
+    layers: ['leaves'],
+    width: 1408,
+    height: 640,
+    prompt:
+      'An autumn mountain slope glowing with red and gold maple leaves, a cluster of bright yellow chrysanthemums blooming in the foreground, a narrow path winding up between rocks, clear crisp sky, a small pavilion roof visible far above',
+  },
+  {
+    id: 'holiday-dongji',
+    section: 'holiday',            /* 수업 장면이 아니라 오프닝 벤토 칸에만 쓴다 */
+    role: 'card',
+    scene: '동지',
+    kw: [],                        /* 수업 문장에 끌려 들어가지 않게 비워 둔다 */
+    motion: 'float',
+    layers: ['steam'],
+    width: 1408,
+    height: 640,
+    prompt:
+      'A generous bowl of deep red Korean patjuk red bean porridge dotted with small round white rice balls, steam curling upward, a brass spoon beside it on a wooden table, a snowy window and the long blue dusk of the shortest day outside',
+  },
 ];
 
 export const ASSET_BY_ID = Object.fromEntries(ASSETS.map((a) => [a.id, a]));
@@ -840,6 +946,7 @@ export const NEEDS_STYLE_BOOST = new Set([
   'songpyeon-steam', 'songpyeon-shaping', 'pine-needles', 'toran-soup', 'jeon-frying',
   'hwayangjeok', 'fresh-fruits', 'chestnut-jujube', 'rice-harvest', 'rice-grains',
   'incense-burner', 'highway-traffic', 'charye-table', 'harvest-basket', 'old-book',
+  'holiday-seollal', 'holiday-dongji',
 ]);
 
 /** 프롬프트 = (필요하면 화풍 선언 +) 장면 설명 + 공통 화풍 */
