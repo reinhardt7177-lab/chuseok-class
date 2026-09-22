@@ -50,12 +50,12 @@ const SONGPYEON = [
 
 /* ─────────────── 강강술래 무용수 (이미 생성됨) ─────────────── */
 const DANCERS = [
-  ['red', 'a deep red skirt and white jeogori top'],
-  ['blue', 'a navy blue skirt and white jeogori top'],
-  ['green', 'a jade green skirt and cream jeogori top'],
-  ['yellow', 'a golden yellow skirt and white jeogori top'],
-  ['purple', 'a soft purple skirt and white jeogori top'],
-  ['orange', 'a persimmon orange skirt and cream jeogori top'],
+  ['red', 'a deep red high-waisted bell-shaped chima and a short white jeogori'],
+  ['blue', 'a navy blue high-waisted bell-shaped chima and a short white jeogori'],
+  ['green', 'a jade green high-waisted bell-shaped chima and a short cream jeogori'],
+  ['yellow', 'a golden yellow high-waisted bell-shaped chima and a short white jeogori'],
+  ['purple', 'a soft purple high-waisted bell-shaped chima and a short white jeogori'],
+  ['orange', 'a persimmon orange high-waisted bell-shaped chima and a short cream jeogori'],
 ];
 
 export const ITEMS = [
@@ -109,8 +109,11 @@ export const ITEMS = [
     portrait: true,
     prompt:
       `a single full body Korean girl in hanbok with ${wear}, standing upright facing the viewer, ` +
+      'the jeogori has a white dongjeong collar and a long goreum ribbon visibly tied at the front, ' +
       'both arms stretched out to the sides at shoulder height as if holding hands with someone, ' +
-      'skirt flaring gently, feet together, simple flat shapes, one figure only',
+      'skirt flaring gently, white beoseon socks and black flower shoes, feet together, ' +
+      'unmistakably Korean clothing, no Chinese hanfu, no Mongolian deel, no Japanese kimono, ' +
+      'simple flat shapes, one figure only',
   })),
 ];
 

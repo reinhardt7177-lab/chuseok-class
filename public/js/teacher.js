@@ -484,8 +484,15 @@ async function ensureRoom() {
     } catch { /* 아래에서 새로 연다 */ }
   }
 
-  /* 방 열기도 한 번 실패했다고 포기하지 않는다. 여기서 포기하면
-     서버가 있는데도 입장 코드 없이 수업을 시작하게 된다. */
+  return openNewRoom();
+}
+
+/**
+ * 방을 하나 새로 연다.
+ * 한 번 실패했다고 포기하지 않는다 — 여기서 포기하면 서버가 있는데도
+ * 입장 코드 없이 수업을 시작하게 된다.
+ */
+async function openNewRoom() {
   for (const wait of [0, 800, 2000]) {
     if (wait) await new Promise((r) => setTimeout(r, wait));
     try {
@@ -502,10 +509,52 @@ async function ensureRoom() {
   return false;
 }
 
+/**
+ * 방이 사라졌을 때 되살린다.
+ *
+ * 방은 서버 메모리에만 있어서, 서버가 잠들었다 깨거나 다시 배포되면 통째로 없어진다.
+ * 그때 이 화면이 가만히 있으면 칠판에 적힌 코드는 죽은 코드가 되고,
+ * 학생은 "입장 코드가 맞지 않아요"만 본다. 실제로 그 일이 있었다.
+ * 그래서 410을 받으면 곧바로 새 방을 열고 코드와 QR을 다시 받아 화면에 띄운다.
+ */
+let recovering = null;
+async function recoverRoom() {
+  recovering ??= (async () => {
+    roomKey = null;
+    const ok = await openNewRoom();
+    if (ok) {
+      await loadConnect();
+      await pushState();
+      listen();
+      paint();
+      showNotice('수업방이 다시 열렸어요 — 새 코드를 알려주세요');
+    }
+    recovering = null;
+    return ok;
+  })();
+  return recovering;
+}
+
+/** 화면 위쪽에 잠깐 뜨는 알림 */
+function showNotice(text) {
+  let box = document.getElementById('notice');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'notice';
+    box.className = 'notice';
+    document.body.append(box);
+  }
+  box.textContent = text;
+  box.classList.add('is-on');
+  clearTimeout(showNotice.t);
+  showNotice.t = setTimeout(() => box.classList.remove('is-on'), 9000);
+}
+
 async function pushState() {
   if (!roomKey) return;                // 방이 없으면(정적 호스팅) 보낼 곳도 없다
   try {
-    await fetch('/api/teacher/state', {
+    /* 아래 fetch의 응답을 보고 410이면 방을 되살린다 */
+    const res = await fetch('/api/teacher/state', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         key: roomKey,
@@ -517,6 +566,7 @@ async function pushState() {
         studentsFollow: true,
       }),
     });
+    if (res.status === 410) await recoverRoom();
   } catch { /* 무시 */ }
 }
 
@@ -524,8 +574,9 @@ async function pull() {
   if (!roomKey) return;
   try {
     const res = await fetch(`/api/teacher/state?key=${encodeURIComponent(roomKey ?? '')}`);
-    if (res.ok) { snap = await res.json(); if (state.picked) paint(); }
-  } catch { /* 무시 */ }
+    if (res.ok) { snap = await res.json(); if (state.picked) paint(); return; }
+    if (res.status === 410) await recoverRoom();   // 서버가 다시 켜져 방이 없어졌다
+  } catch { /* 잠깐 끊긴 것뿐일 수 있다 */ }
 }
 
 async function loadConnect() {
@@ -544,12 +595,16 @@ async function loadConnect() {
   if (state.picked && isLast()) paint();
 }
 
+let es = null;
 async function listen() {
   /* 서버가 없는데 EventSource를 열면 몇 초마다 다시 붙으려 한다.
      화면에는 아무 영향이 없지만 콘솔이 오류로 뒤덮인다. */
   if (!(await hasServer())) return;
-  const es = new EventSource(`/api/events?key=${encodeURIComponent(roomKey ?? '')}`);
+  es?.close();
+  es = new EventSource(`/api/events?key=${encodeURIComponent(roomKey ?? '')}`);
   es.addEventListener('update', () => pull());
+  /* 연결이 끊기면 서버가 다시 켜졌다는 뜻일 수 있다. 한 번 물어본다. */
+  es.onerror = () => { setTimeout(pull, 1500); };
 }
 
 /* ═══════════════ 이벤트 ═══════════════ */

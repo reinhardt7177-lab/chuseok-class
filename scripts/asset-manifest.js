@@ -18,10 +18,38 @@ export const STYLE_SUFFIX =
   'gentle hand-painted texture with visible paper grain, soft rim light, ' +
   'no text, no letters, no watermark, wholesome and serene mood';
 
+export const KOREAN_GUARD =
+  ' STRICTLY KOREAN, never Chinese or Japanese. ' +
+  'Women wear hanbok: a short jeogori jacket ending above the chest with a wide white dongjeong collar band ' +
+  'and a long goreum ribbon tied in a loop at the front, over a very high-waisted bell-shaped chima skirt. ' +
+  'Men wear a jeogori jacket with baji trousers gathered at the ankle, often a durumagi overcoat, ' +
+  'and older men a black horsehair gat hat. Children wear kkachi durumagi with rainbow saekdong striped sleeves. ' +
+  'Buildings are Korean hanok: gently curved giwa clay tiled roofs, undressed wooden posts, ' +
+  'a raised wooden daecheong floor, and hanji paper doors on a fine square lattice. ' +
+  'No Chinese hanfu, no wide draping sleeves, no Chinese red lanterns, no Japanese kimono or obi, ' +
+  'no shoji screens, no tatami mats.';
+
+/** 가배 장면은 조선 후기 한복이 아니라 삼국시대 토용·사료를 기준으로 따로 묘사한다. */
+export const SILLA_GUARD =
+  ' STRICTLY an early Korean Silla scene, not a Joseon court and not a Chinese or Mongolian court. ' +
+  'Women wear practical early Korean garments: a fitted cross-collar jeogori reaching the hip, ' +
+  'narrow sleeves, a long chima skirt and a visible fabric waist sash; hair is gathered into a simple high bun. ' +
+  'Use ramie, hemp and plain silk in ivory, indigo, muted vermilion and ochre. ' +
+  'No late-Joseon short jeogori, no oversized Chinese hanfu sleeves, no Tang court dress, ' +
+  'no Mongolian deel, no Japanese kimono, no fantasy crown, no round mandarin collar.';
+
 export const NEGATIVE =
-  'text, letters, korean text, hangul, chinese characters, watermark, signature, logo, caption, ' +
+  'text, letters, korean text, hangul, chinese characters, japanese characters, watermark, signature, ' +
+  'seal, red stamp, logo, caption, ' +
   'ugly, deformed hands, extra fingers, distorted face, horror, scary, blurry, lowres, ' +
-  'photorealistic, photograph, photo, realistic photography, dslr, bokeh photography, 3d render, cgi';
+  'photorealistic, photograph, photo, realistic photography, dslr, bokeh photography, 3d render, cgi, ' +
+  /* 이웃 나라 옷·건물로 흘러가는 것을 막는다.
+     이 줄이 없으면 "hanbok"이라고 적어도 한푸나 기모노가 나온다. */
+  'chinese hanfu, hanfu, qipao, cheongsam, chinese dress, chinese clothing, chinese lantern, ' +
+  'chinese architecture, chinese temple, red painted pillars, wide draping sleeves, ' +
+  'japanese kimono, yukata, obi, haori, hakama, shoji screen, tatami, japanese architecture, ' +
+  'sumo wrestler, mawashi, topknot headgear, mongolian deel, mongolian wrestling, ' +
+  'coffee cup, coffee mug, western furniture';
 
 /**
  * 음식·사물처럼 "사진 같은" 소재는 화풍이 사진 쪽으로 끌려간다.
@@ -97,10 +125,7 @@ export const ASSETS = [
     kw: ['가족이 모', '온 가족', '함께 보'],
     motion: 'kenburns-out', layers: ['dust'],
     prompt:
-      'A warm Korean family of many generations gathered on the wooden floor of a hanok living room, ' +
-      'grandparents, parents and children sitting together around a low table laden with holiday food, ' +
-      'everyone smiling and talking, autumn sunlight streaming through paper sliding doors, ' +
-      'persimmons hanging to dry under the eaves outside',
+      'Three generations of a Korean family sitting on the raised wooden daecheong floor of a hanok around a low round soban table laden with songpyeon, jeon pancakes and persimmons, grandmother in a jade chima and white jeogori, children in rainbow saekdong sleeves, autumn courtyard seen through open lattice doors',
   },
   {
     id: 'moon-phases', section: 'what-is', role: 'detail',
@@ -118,9 +143,7 @@ export const ASSETS = [
     kw: ['가을의 한가운데', '한가위의'],
     motion: 'kenburns-in', layers: ['leaves', 'dust'],
     prompt:
-      'A sunlit hanok courtyard in autumn, large earthenware jars lined along a stone terrace, ' +
-      'strings of red persimmons drying under the wooden eaves, a broom leaning by the door, ' +
-      'golden ginkgo leaves scattered on the packed earth, peaceful midmorning light',
+      'A sunlit hanok courtyard in autumn, rows of dark brown onggi earthenware jars on a raised stone jangdokdae platform, persimmons drying on a string under the eaves, a curved giwa tiled roof, a straw broom leaning by the wooden door, golden ginkgo leaves on the packed earth',
   },
   {
     id: 'greeting-elders', section: 'what-is', role: 'detail',
@@ -128,9 +151,7 @@ export const ASSETS = [
     kw: ['인사', '어른', '할머니', '할아버지'],
     motion: 'still', layers: ['dust'],
     prompt:
-      'Children in colorful hanbok bowing politely to smiling grandparents seated on a warm floor, ' +
-      'a low table with tea and rice cakes beside them, folding screen in the background, ' +
-      'gentle affectionate atmosphere, soft warm interior light',
+      'Two Korean children kneeling on the wooden floor of a hanok room making a deep sebae bow to their grandmother, the girl in a pink chima and yellow jeogori, the boy in a blue jeogori and baji, grandmother seated on a floor cushion in a grey chima smiling with her hands raised in blessing, hanji paper lattice doors behind them',
   },
   {
     id: 'homecoming-road', section: 'what-is', role: 'detail',
@@ -160,9 +181,7 @@ export const ASSETS = [
     kw: ['길쌈', '베 짜기', '겨루', '짰는지'],
     motion: 'pan-right', layers: ['dust'],
     prompt:
-      'Ancient Silla dynasty scene, two teams of women in flowing hanbok weaving hemp cloth on wooden looms ' +
-      'in a palace courtyard, baskets of thread and woven fabric stacked beside them, ' +
-      'a royal princess overseeing the contest from a pavilion, autumn trees, historical Korean painting mood',
+      'Ancient Silla-era Korean women working at wooden treadle looms in a palace courtyard, spinning and weaving hemp cloth, baskets of thread beside them, wearing simple early hanbok of ramie in ivory and indigo, a low stone wall and a hanok hall with a curved giwa roof behind, early autumn light',
   },
   {
     id: 'silla-palace', section: 'origin', role: 'detail',
@@ -170,9 +189,7 @@ export const ASSETS = [
     kw: ['신라', '유리왕', '유리이사금', '6부'],
     motion: 'kenburns-in', layers: ['dust'],
     prompt:
-      'A majestic ancient Silla palace complex with sweeping tiled roofs and painted wooden brackets, ' +
-      'stone stairways and courtyards, pine trees and distant mountains, ' +
-      'banners fluttering, early morning haze, grand historical atmosphere',
+      'A Silla-era Korean palace hall seen across a wide swept earth courtyard, unpainted timber posts and a broad gently curved giwa tiled roof, low stone foundation terrace, pine trees and distant mountains, quiet morning light, no red paint',
   },
   {
     id: 'weaving-loom', section: 'origin', role: 'detail',
@@ -190,9 +207,7 @@ export const ASSETS = [
     kw: ['대접', '노래하고', '춤', '잔치', '가배'],
     motion: 'sway', layers: ['sparks'],
     prompt:
-      'A joyful ancient Korean outdoor feast at night, women in hanbok sharing food and drink at long low tables, ' +
-      'some dancing and singing together in a loose circle, musicians with drums at the side, ' +
-      'torches and lanterns casting warm light, everyone celebrating together regardless of who won',
+      'A Silla-era Korean village feast at night under lanterns, long low tables of rice cakes and fruit, women in early hanbok of ramie and indigo pouring drinks and laughing together, a drummer with a buk at the side, warm firelight, hanok roofs behind',
   },
   {
     id: 'old-book', section: 'origin', role: 'card',
@@ -325,9 +340,7 @@ export const ASSETS = [
     kw: ['차례상', '상을 차려', '상차림'],
     motion: 'pan-left', layers: ['dust'],
     prompt:
-      'A carefully arranged Korean ancestral memorial table seen from a respectful angle, ' +
-      'neat rows of brass bowls, stacked fruit, pan fried jeon, rice cakes and a small incense burner with thin smoke, ' +
-      'a folding screen behind, morning light through hanji paper doors, quiet and reverent atmosphere',
+      'A Korean charye ancestral offering table set in a hanok room: a low wide wooden table before a folding ink-landscape byeongpung screen, brass ritual bowls of rice and soup, stacked jujubes chestnuts pears and persimmons on footed brass dishes, an incense burner in front, hanji paper lattice doors at the sides',
   },
   {
     id: 'charye-bowing', section: 'customs', role: 'detail',
@@ -335,9 +348,7 @@ export const ASSETS = [
     kw: ['차례', '인사드려', '제사', '절'],
     motion: 'still', layers: ['dust'],
     prompt:
-      'A family in traditional hanbok bowing together before a memorial table in a hanok room, ' +
-      'seen from behind and slightly to the side so the gesture reads clearly, ' +
-      'soft morning light through paper doors, incense smoke curling upward, solemn and warm',
+      'A Korean family performing the charye bow in a hanok room, two adults in hanbok kneeling with foreheads to the wooden floor before a low offering table, the man in a grey durumagi coat, the woman in a navy chima and white jeogori, a folding ink screen behind the table, morning light through hanji doors',
   },
   {
     id: 'seongmyo', section: 'customs', role: 'detail',
@@ -385,9 +396,7 @@ export const ASSETS = [
     kw: ['집집마다', '간단히', '지내지 않', '문헌마다', '가가례', '표준안'],
     motion: 'kenburns-in', layers: ['dust'],
     prompt:
-      'A cheerful family portrait in beautiful traditional hanbok of many colors, ' +
-      'grandparents, parents and children standing together in a hanok courtyard, ' +
-      'everyone smiling warmly at the viewer, autumn foliage behind, bright and joyful',
+      'A Korean family of five standing together in front of their hanok home in full hanbok for Chuseok: mother in a crimson chima with a jade jeogori and a tied goreum ribbon, father in a pale blue jeogori with baji and a grey durumagi, children in kkachi durumagi with rainbow saekdong sleeves, curved giwa roof and autumn maple behind them, warm and proud',
   },
   {
     id: 'hanji-door', section: 'customs', role: 'card',
@@ -428,9 +437,7 @@ export const ASSETS = [
     kw: ['씨름'],
     motion: 'kenburns-in', layers: ['dust'],
     prompt:
-      'Two Korean wrestlers gripping each others satba belts in a sandy ring, ' +
-      'muscles tensed in a balanced struggle, a lively crowd of villagers cheering around the edge, ' +
-      'a prize bull tethered nearby, bright autumn afternoon, dynamic and energetic',
+      'Two Korean ssireum wrestlers gripping the satba of the other — a red and blue cloth sash looped around the waist and one thigh — crouched low on a circular sand ring, bare-chested in plain shorts, no headgear, a village crowd in hanbok watching from the grassy edge under autumn trees',
   },
   {
     id: 'tug-of-war', section: 'play', role: 'detail',
@@ -521,9 +528,7 @@ export const ASSETS = [
     kw: ['풍년', '건강', '안녕'],
     motion: 'float', layers: ['sparks', 'fireflies'],
     prompt:
-      'Dozens of warm glowing paper lanterns floating upward into a deep night sky, ' +
-      'people below watching with upturned faces, a full moon behind them, ' +
-      'golden light reflecting on a still pond, magical and hopeful',
+      'A Korean village path at night lined with cheongsachorong lanterns — octagonal frames covered in red and blue silk glowing warmly on wooden poles — leading toward a hanok gate, villagers walking quietly with small lanterns, a huge full moon above the tiled roofs',
   },
   {
     id: 'moon-giant', section: 'wish', role: 'detail',
@@ -646,9 +651,7 @@ export const ASSETS = [
     kw: ['알려줘', '가족에게'],
     motion: 'float', layers: ['sparks'],
     prompt:
-      'A child handing a small hand drawn card to a smiling grandparent, ' +
-      'both seated on a warm wooden floor with tea between them, ' +
-      'soft evening light through a paper door, quiet gratitude, gentle and moving',
+      'A Korean child pressing a small gift into the hands of a grandmother on the wooden daecheong floor of a hanok, the grandmother in a soft grey chima and white jeogori smiling warmly, the child in an orange jeogori, hanji paper lattice doors behind, gentle afternoon light, nothing on the floor between them',
   },
   {
     id: 'moon-farewell', section: 'wrap', role: 'detail',
@@ -709,9 +712,7 @@ export const ASSETS = [
     kw: ['왕의 두 딸', '왕녀', '이끌'],
     motion: 'kenburns-in', layers: ['dust'],
     prompt:
-      'A young Silla princess in elegant royal hanbok standing on a pavilion step, ' +
-      'gesturing warmly toward women working at looms below her, ' +
-      'attendants beside her holding rolls of woven cloth, dignified and kind, historical Korean painting mood',
+      'A Silla-era Korean princess standing on the stone steps of a palace hall addressing two groups of women gathered below, she wears a long ivory and vermilion early hanbok with her hair in a braided coil, the hall behind has unpainted timber posts and a curved giwa roof, autumn foliage, no red pillars',
   },
   {
     id: 'kids-circle-dance', section: 'play', role: 'detail',
@@ -729,9 +730,7 @@ export const ASSETS = [
     kw: ['두 손', '눈을 감', '마음속', '소리 내어'],
     motion: 'float', layers: ['sparks'],
     prompt:
-      'Close view of a child two small hands pressed together in front of the chest in a wish making gesture, ' +
-      'warm golden moonlight falling on them, tiny light motes floating around, ' +
-      'soft dark background, tender and sincere',
+      'A close view of the clasped hands of a Korean woman raised in a wish before a glowing full moon, her sleeve is a white jeogori cuff with a jade goreum ribbon, warm moonlight on her fingers, deep indigo night behind, tender and quiet',
   },
   {
     id: 'wrap-telling-family', section: 'wrap', role: 'detail',
@@ -739,9 +738,7 @@ export const ASSETS = [
     kw: ['기억에 남는', '한 문장으로'],
     motion: 'kenburns-in', layers: ['dust'],
     prompt:
-      'A child excitedly explaining something to grandparents and parents at a low table, ' +
-      'gesturing with both hands while the family listens with warm amused smiles, ' +
-      'a plate of rice cakes and tea on the table, cozy evening room, affectionate',
+      'A Korean child at home excitedly telling their mother and grandmother what they learned today, all three seated at a low wooden table, the grandmother in a jade chima and white jeogori, plates of songpyeon between them, a hanok room with hanji lattice doors, warm lamplight, no cups',
   },
   {
     id: 'wrap-calendar', section: 'wrap', role: 'card', width: 1024, height: 1024,
@@ -749,9 +746,7 @@ export const ASSETS = [
     kw: ['문제를 풀', '퀴즈로 확인', 'O 또는 X', '먼저 퀴즈'],
     motion: 'still', layers: [],
     prompt:
-      'A simple wall calendar page with one date circled in warm orange crayon, ' +
-      'a small drawing of a full moon and a half moon shaped rice cake doodled beside it, ' +
-      'no readable text or numbers anywhere, plain wall behind, childlike and warm',
+      'A simple paper wall calendar page with one date circled in warm orange crayon and a small hand-drawn full moon beside the circle, soft cream paper, no readable numbers or words, plain and clean',
   },
   {
     id: 'wrap-moon-together', section: 'wrap', role: 'detail',
@@ -771,10 +766,7 @@ export const ASSETS = [
     scene: '차례상 뒤 병풍',
     motion: 'still', layers: [],
     prompt:
-      'A traditional Korean folding screen seen straight from the front, filling the whole frame, ' +
-      'six tall panels divided by thin dark wooden frames, ' +
-      'each panel painted with a quiet ink landscape of pine trees, distant mountains and a pale moon, ' +
-      'muted cream silk with soft ink washes, symmetrical and calm, no people',
+      'A Korean folding byeongpung screen of eight tall narrow panels standing behind an ancestral table, each panel painted with a restrained Korean ink landscape of pine trees and misty mountains on aged ivory hanji, plain dark wooden frame, no writing, no seals, seen straight from the front',
   },
   {
     id: 'ritual-table', section: 'ui', role: 'ui',
@@ -836,7 +828,7 @@ export const ASSETS = [
     width: 1408,
     height: 640,
     prompt:
-      'A warm Korean New Year morning indoors: two small children in bright hanbok bowing deeply on a floor cushion to smiling grandparents seated on a low platform, a steaming bowl of tteokguk rice cake soup on a small wooden table beside them, paper window light, a folded silk pouch resting nearby',
+      'A Korean Lunar New Year morning in a hanok room: two small children in bright hanbok with rainbow saekdong sleeves making a deep sebae bow on the wooden floor to their grandparents seated on floor cushions, grandfather in a grey durumagi, grandmother in a jade chima, a steaming bowl of tteokguk on a low soban table nearby, hanji paper lattice doors behind',
   },
   {
     id: 'holiday-daeboreum',
@@ -888,7 +880,7 @@ export const ASSETS = [
     width: 1408,
     height: 640,
     prompt:
-      'A young woman in a bright hanbok standing on a tall rope swing, swinging high among lush green early-summer trees, her long skirt and hair ribbons streaming in the wind, village children watching from below, blue sky through the leaves',
+      'A Korean woman in a bright orange chima and white jeogori standing on a tall rope swing, swinging high among lush green early-summer trees, her skirt and hair ribbons streaming, village children in hanbok watching from below, blue sky through the leaves, no seal, no writing',
   },
   {
     id: 'holiday-chilseok',
@@ -950,7 +942,58 @@ export const NEEDS_STYLE_BOOST = new Set([
 ]);
 
 /** 프롬프트 = (필요하면 화풍 선언 +) 장면 설명 + 공통 화풍 */
+
+/**
+ * 사람이나 집이 나와서 "한국 것"임을 따로 못박아야 하는 그림들.
+ * 이름만 'hanbok'이라고 적어 두었더니 중국 한푸·일본 기모노로 흘렀다.
+ */
+export const NEEDS_KOREAN = new Set([
+  'family-gathering',
+  'hanok-courtyard',
+  'greeting-elders',
+  'homecoming-road',
+  'rice-harvest',
+  'charye-table',
+  'charye-bowing',
+  'seongmyo',
+  'beolcho',
+  'hanbok-family',
+  'ganggangsullae',
+  'ganggangsullae-above',
+  'ssireum',
+  'tug-of-war',
+  'neolttwigi',
+  'bull-fight',
+  'geobuk-nori',
+  'moon-wish',
+  'wish-lanterns',
+  'thank-you-scene',
+  'opening-children-look',
+  'two-holidays',
+  'kids-circle-dance',
+  'wrap-telling-family',
+  'wrap-moon-together',
+  'byeongpung',
+  'holiday-seollal',
+  'holiday-daeboreum',
+  'holiday-hansik',
+  'wish-hands',
+  'holiday-dano',
+]);
+
+export const NEEDS_SILLA = new Set([
+  'silla-weaving',
+  'silla-palace',
+  'silla-feast',
+  'silla-two-teams',
+  'silla-princess',
+]);
+
 export function fullPrompt(asset) {
   const prefix = NEEDS_STYLE_BOOST.has(asset.id) ? STYLE_PREFIX : '';
-  return `${prefix}${asset.prompt}. ${STYLE_SUFFIX}`;
+  /* 사람이나 집이 나오는 그림은 한국 것임을 따로 못박는다 */
+  const guard = NEEDS_SILLA.has(asset.id)
+    ? SILLA_GUARD
+    : (NEEDS_KOREAN.has(asset.id) ? KOREAN_GUARD : '');
+  return `${prefix}${asset.prompt}.${guard} ${STYLE_SUFFIX}`;
 }

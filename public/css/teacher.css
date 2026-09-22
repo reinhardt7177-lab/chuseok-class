@@ -716,3 +716,23 @@ body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .moonwish { animation: moon-rise .55s var(--ease) backwards; }
 }
+
+/* 수업 중 잠깐 뜨는 알림 — 방이 다시 열렸을 때처럼 꼭 알려야 하는 것만 */
+.notice {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translate(-50%, -140%);
+  z-index: 200;
+  padding: 12px 26px;
+  border-radius: 999px;
+  background: var(--persimmon);
+  color: #fff;
+  font-family: var(--font-title);
+  font-size: clamp(14px, 1.3vw, 18px);
+  font-weight: 700;
+  box-shadow: var(--shadow-lift);
+  transition: transform .34s var(--ease);
+  pointer-events: none;
+}
+.notice.is-on { transform: translate(-50%, 0); }
