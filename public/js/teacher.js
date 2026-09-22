@@ -37,6 +37,12 @@ const state = {
 let snap = null;      // 서버에서 받은 교실 상태
 let connect = null;   // QR·코드
 
+/* 이 화면이 연 방의 열쇠. 새로고침해도 같은 방으로 돌아오도록 저장해 둔다.
+   로그인이 없는 앱이라, 이 열쇠가 곧 "이 방은 내 방"이라는 증표다. */
+const KEY_SAVE = 'chuseok.teacherKey';
+let roomKey = null;
+try { roomKey = localStorage.getItem(KEY_SAVE); } catch { /* 사생활 보호 창 */ }
+
 const LAST = SECTIONS.length;              // 학생 활동 안내 단계
 const isLast = () => state.index >= LAST;
 const section = () => SECTIONS[state.index] ?? null;
@@ -302,10 +308,10 @@ function quizHtml(cut) {
 
 async function live(action, extra = {}) {
   try {
-    if (!(await hasServer())) return;
+    if (!roomKey) return;
     const res = await fetch('/api/teacher/live', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ action, ...extra }),
+      body: JSON.stringify({ key: roomKey, action, ...extra }),
     });
     if (res.ok) { snap = await res.json(); paint(); }
   } catch { /* 서버가 잠깐 끊겨도 화면은 유지 */ }
@@ -374,12 +380,42 @@ function step(dir) {
 
 /* ═══════════════ 서버 ═══════════════ */
 
+/**
+ * 내 방을 마련한다.
+ * 전에 쓰던 열쇠가 아직 살아 있으면 그 방을 그대로 쓰고(새로고침),
+ * 아니면 새로 연다. 방마다 입장 코드가 달라서 옆 반과 섞이지 않는다.
+ */
+async function ensureRoom() {
+  if (!(await hasServer())) return false;
+
+  if (roomKey) {
+    try {
+      const res = await fetch(`/api/teacher/state?key=${encodeURIComponent(roomKey)}`);
+      if (res.ok) { snap = await res.json(); return true; }
+    } catch { /* 아래에서 새로 연다 */ }
+  }
+
+  try {
+    const res = await fetch('/api/teacher/open', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ band: state.band }),
+    });
+    if (!res.ok) return false;
+    ({ key: roomKey } = await res.json());
+    try { localStorage.setItem(KEY_SAVE, roomKey); } catch { /* 무시 */ }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function pushState() {
-  if (!(await hasServer())) return;    // 정적 호스팅이면 보낼 곳이 없다
+  if (!roomKey) return;                // 방이 없으면(정적 호스팅) 보낼 곳도 없다
   try {
     await fetch('/api/teacher/state', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
+        key: roomKey,
         band: state.band,
         sectionId: isLast() ? 'student' : section().id,
         activityOpen: isLast(),          // 마지막 단계에서 학생 활동이 열린다
@@ -390,9 +426,9 @@ async function pushState() {
 }
 
 async function pull() {
-  if (!(await hasServer())) return;
+  if (!roomKey) return;
   try {
-    const res = await fetch('/api/teacher/state');
+    const res = await fetch(`/api/teacher/state?key=${encodeURIComponent(roomKey ?? '')}`);
     if (res.ok) { snap = await res.json(); if (state.picked) paint(); }
   } catch { /* 무시 */ }
 }
@@ -400,7 +436,7 @@ async function pull() {
 async function loadConnect() {
   if (await hasServer()) {
     try {
-      connect = await (await fetch('/api/connect')).json();
+      connect = await (await fetch(`/api/connect?key=${encodeURIComponent(roomKey ?? '')}`)).json();
       if (state.picked && isLast()) paint();
       return;
     } catch { /* 아래 정적 안내로 내려간다 */ }
@@ -417,7 +453,7 @@ async function listen() {
   /* 서버가 없는데 EventSource를 열면 몇 초마다 다시 붙으려 한다.
      화면에는 아무 영향이 없지만 콘솔이 오류로 뒤덮인다. */
   if (!(await hasServer())) return;
-  const es = new EventSource('/api/events');
+  const es = new EventSource(`/api/events?key=${encodeURIComponent(roomKey ?? '')}`);
   es.addEventListener('update', () => pull());
 }
 
@@ -475,9 +511,12 @@ document.addEventListener('keydown', (e) => {
 
 renderStage($('pick'), 'landing-hero', { motion: 'kenburns-in', layers: ['moonlight', 'fireflies'] });
 paintPick();
-listen();
-loadConnect();
-pull();
+/* 방을 먼저 열어야 코드·QR·명단이 내 반 것으로 나온다 */
+ensureRoom().then(() => {
+  listen();
+  loadConnect();
+  pull();
+});
 setInterval(() => { if (state.picked) paintSide(); }, 1000);
 setTimeout(() => $('hintFs')?.remove(), 9000);
 preload(assetsFor('opening').map((a) => a.id));

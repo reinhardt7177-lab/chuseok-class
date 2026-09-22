@@ -147,7 +147,8 @@ async function poll() {
 }
 
 function listen() {
-  const es = new EventSource('/api/events');
+  /* 내가 들어간 방의 소식만 받는다 */
+  const es = new EventSource(`/api/events?studentId=${encodeURIComponent(me.id)}`);
   es.addEventListener('update', () => poll());
   es.onopen = () => setConn(true);
   es.onerror = () => setConn(false);
