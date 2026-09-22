@@ -273,13 +273,32 @@ app.get('/api/connect', async (req, res) => {
   const room = roomByKey(req.query.key);
   if (!room) return res.json({ server: true });
 
-  const url = `${publicOrigin(req)}/student.html?code=${room.code}`;
+  const origin = publicOrigin(req);
+  const url = `${origin}/student.html?code=${room.code}`;
   const qr = await QRCode.toDataURL(url, {
     width: 420,
     margin: 1,
     color: { dark: '#1b1f2e', light: '#ffffff' },
   });
   res.json({ url, origin, code: room.code, qr });
+});
+
+/* ─────────────── 넘어진 자리 ─────────────── */
+
+/**
+ * 수업 도중 예상 못 한 오류 하나로 프로세스가 죽으면
+ * 그 반 학생 서른 명이 한꺼번에 튕긴다. 오류는 남기고 계속 돈다.
+ */
+app.use((err, req, res, _next) => {
+  console.error(`  ⚠️  ${req.method} ${req.path} —`, err?.message ?? err);
+  if (!res.headersSent) res.status(500).json({ error: '잠시 문제가 있었어요. 다시 해주세요.' });
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('  ⚠️  처리 못 한 오류 —', err?.stack ?? err);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('  ⚠️  처리 못 한 거절 —', err?.stack ?? err);
 });
 
 /* ─────────────── 시작 ─────────────── */
