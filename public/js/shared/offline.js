@@ -10,12 +10,33 @@
 
 let asked = null;
 
-/** @returns {Promise<boolean>} 교실 서버가 응답하면 true */
+/**
+ * @returns {Promise<boolean>} 교실 서버가 응답하면 true
+ *
+ * 한 번 물어보고 끝내면 안 된다. 그 한 번이 하필 흔들리면 서버가 멀쩡히
+ * 있는데도 "서버 없음"으로 굳어져, 선생님 화면에 입장 코드 대신
+ * 혼자 학습 안내가 뜬다. 잠들었다 깨는 무료 호스팅에서 특히 잘 난다.
+ * 그래서 대답이 없을 때만 몇 번 더 물어본다.
+ */
 export function hasServer() {
-  asked ??= fetch('api/connect', { method: 'GET' })
-    .then((r) => r.ok)
-    .catch(() => false);
+  asked ??= probe();
   return asked;
+}
+
+async function probe() {
+  for (const wait of [0, 700, 1800]) {
+    if (wait) await new Promise((r) => setTimeout(r, wait));
+    try {
+      const stop = AbortController ? new AbortController() : null;
+      const timer = setTimeout(() => stop?.abort(), 5000);
+      const res = await fetch('api/connect', { signal: stop?.signal });
+      clearTimeout(timer);
+      /* 404는 "여기 서버 없음"이라는 분명한 대답이므로 더 묻지 않는다 */
+      if (res.ok) return true;
+      if (res.status === 404) return false;
+    } catch { /* 대답이 없었을 뿐이다 — 다시 물어본다 */ }
+  }
+  return false;
 }
 
 /**

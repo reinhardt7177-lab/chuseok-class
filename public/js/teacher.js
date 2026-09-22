@@ -395,18 +395,22 @@ async function ensureRoom() {
     } catch { /* 아래에서 새로 연다 */ }
   }
 
-  try {
-    const res = await fetch('/api/teacher/open', {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ band: state.band }),
-    });
-    if (!res.ok) return false;
-    ({ key: roomKey } = await res.json());
-    try { localStorage.setItem(KEY_SAVE, roomKey); } catch { /* 무시 */ }
-    return true;
-  } catch {
-    return false;
+  /* 방 열기도 한 번 실패했다고 포기하지 않는다. 여기서 포기하면
+     서버가 있는데도 입장 코드 없이 수업을 시작하게 된다. */
+  for (const wait of [0, 800, 2000]) {
+    if (wait) await new Promise((r) => setTimeout(r, wait));
+    try {
+      const res = await fetch('/api/teacher/open', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ band: state.band }),
+      });
+      if (!res.ok) continue;
+      ({ key: roomKey } = await res.json());
+      try { localStorage.setItem(KEY_SAVE, roomKey); } catch { /* 사생활 보호 창 */ }
+      return true;
+    } catch { /* 다시 */ }
   }
+  return false;
 }
 
 async function pushState() {
