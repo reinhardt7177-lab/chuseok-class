@@ -116,11 +116,16 @@ export class Classroom {
 
   /**
    * 대기실을 연다 — 아이들이 다 모였는지 눈으로 확인하는 자리.
-   * 여기서 점수를 비운다. 시작 전에 비워야 연습으로 누른 점수가 안 섞인다.
+   *
+   * 시작 전이면 점수를 비운다. 연습으로 누른 것이 섞이면 안 되기 때문이다.
+   * 다만 퀴즈가 이미 돌고 있는데 선생님이 뒤로 갔다 오는 경우에는 비우지 않는다.
+   * 그때 비우면 아이들이 쌓은 점수가 통째로 날아간다.
    */
   openLobby({ total = 10 } = {}) {
-    this.points.clear();
-    this.quizAnswers.clear();
+    if (this.live.phase === 'off') {
+      this.points.clear();
+      this.quizAnswers.clear();
+    }
     this.live = {
       ...this.live,
       on: true,
