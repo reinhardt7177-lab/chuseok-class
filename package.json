@@ -4,14 +4,17 @@
   "private": true,
   "description": "추석 계기교육 인터랙티브 앱 — 교사용 전체학습 + 학생용 개별학습",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server/server.js",
     "dev": "node --watch server/server.js",
     "key:check": "node scripts/check-key.js",
     "models": "node scripts/list-models.js",
     "assets": "node scripts/generate-assets.js",
-    "assets:dry": "node scripts/generate-assets.js --dry-run"
+    "assets:dry": "node scripts/generate-assets.js --dry-run",
+    "deploy:render": "node scripts/deploy-render.js"
   },
   "dependencies": {
     "express": "^4.21.2",

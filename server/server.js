@@ -244,6 +244,26 @@ function lanAddress() {
 }
 
 /**
+ * 학생에게 알려줄 주소의 앞부분.
+ *
+ * 세 경우를 모두 맞춰야 한다.
+ *   배포판          — 프록시 뒤라 Host에 진짜 주소가 온다 (https://....onrender.com)
+ *   교실, localhost — 선생님 화면 주소가 localhost다. 그대로 주면 학생 기기가 못 들어온다.
+ *   교실, 와이파이  — 이미 옳은 주소이므로 그대로 쓴다.
+ *
+ * 프록시 헤더는 값이 여럿 붙어 올 수 있어 앞의 것만 쓴다.
+ */
+function publicOrigin(req) {
+  const first = (v) => String(v ?? '').split(',')[0].trim();
+  const host = first(req.get('x-forwarded-host')) || first(req.get('host'));
+  const loopback = !host || /^(localhost|127\.|\[?::1\]?)/i.test(host);
+  if (loopback) return `http://${lanAddress()}:${PORT}`;
+
+  const proto = first(req.get('x-forwarded-proto')) || req.protocol;
+  return `${proto}://${host}`;
+}
+
+/**
  * 학생 접속 주소와 QR.
  *
  * key 없이 부르면 "서버는 살아 있다"는 대답만 한다.
@@ -253,15 +273,7 @@ app.get('/api/connect', async (req, res) => {
   const room = roomByKey(req.query.key);
   if (!room) return res.json({ server: true });
 
-  /* 배포판(https)에서는 지금 열려 있는 주소를 그대로 쓰고,
-     교실 서버에서는 와이파이 IP를 알려준다. localhost로는 학생 기기가 못 들어온다. */
-  const proto = req.get('x-forwarded-proto') ?? req.protocol;
-  const forwarded = req.get('x-forwarded-host');
-  const origin = forwarded
-    ? `${proto}://${forwarded}`
-    : `http://${lanAddress()}:${PORT}`;
-
-  const url = `${origin}/student.html?code=${room.code}`;
+  const url = `${publicOrigin(req)}/student.html?code=${room.code}`;
   const qr = await QRCode.toDataURL(url, {
     width: 420,
     margin: 1,
