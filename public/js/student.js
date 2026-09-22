@@ -86,6 +86,8 @@ function setupEnter() {
   hasServer().then((up) => {
     if (up) return;
     $('joinForm').hidden = true;
+    const lead = document.querySelector('.enter__sub');
+    if (lead) lead.innerHTML = '보름달 아래에서 한 시간,<br>추석을 알아봅시다.';
     const door = document.querySelector('.solo-door');
     if (door) {
       door.classList.add('solo-door--only');
