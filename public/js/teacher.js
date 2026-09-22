@@ -9,7 +9,7 @@
 
 import { SECTIONS, BANDS, BAND_ORDER, resolveSection, totalMinutes, beatsFor } from './data/lesson.js';
 import { defaultVideo, formatDuration, embedUrl, watchUrl } from './data/videos.js';
-import { quizFor } from './data/quiz.js';
+import { quizFor, titleFor } from './data/quiz.js';
 import { assetsFor } from './shared/assets.js';
 import { renderStage, preload } from './shared/stage.js';
 import { hasServer, qrDataUrl } from './shared/offline.js';
@@ -64,6 +64,8 @@ function currentBeats() {
   /* 마무리 장면은 라이브 퀴즈 — 문제마다 한 컷, 끝에 순위 */
   if (s.id === 'wrap') {
     const qs = quizFor(state.band);
+    /* 문제를 바로 열지 않는다. 먼저 다 모였는지 이름으로 확인한다. */
+    beats.push({ kind: 'lobby', total: qs.length, art: spare() });
     qs.forEach((q, i) => beats.push({ kind: 'quiz', q, qIndex: i, total: qs.length, art: spare() }));
     beats.push({ kind: 'rank', art: spare() });
   }
@@ -84,9 +86,14 @@ function paint() {
   state.beat = Math.max(0, Math.min(list.length - 1, state.beat));
   const cut = list[state.beat];
 
-  /* 퀴즈 컷을 벗어나면 라이브를 닫는다.
-     안 닫으면 학생 기기가 정답 화면에 갇혀서 다음으로 못 넘어간다. */
-  if (snap?.live?.on && cut?.kind !== 'quiz') live('close');
+  /* 대기실·문제·시상식을 모두 벗어나면 라이브를 닫는다.
+     안 닫으면 학생 기기가 퀴즈 화면에 갇혀서 다음으로 못 넘어간다. */
+  const LIVE_CUTS = ['lobby', 'quiz', 'rank'];
+  if (snap?.live?.on && !LIVE_CUTS.includes(cut?.kind)) live('close');
+
+  /* 컷에 들어서면 그 단계를 학생 화면에도 알린다 */
+  if (cut?.kind === 'lobby' && snap?.live?.phase !== 'lobby') live('lobby', { total: cut.total });
+  if (cut?.kind === 'rank' && snap?.live?.phase !== 'final') live('final');
 
   if (cut?.art) renderStage($('scene'), cut.art.id, { motion: cut.art.motion, layers: cut.art.layers });
 
@@ -208,19 +215,49 @@ function paintCut(cut) {
       host.innerHTML = quizHtml(cut);
       break;
 
+    case 'lobby': {
+      wide();
+      const here = (snap?.students ?? []).filter((x) => x.online);
+      host.innerHTML = `
+        <p class="cut__lead">🙋 다 모였나요?</p>
+        <div class="lobby">
+          <div class="lobby__count"><b>${here.length}</b><span>명 들어왔어요</span></div>
+          <div class="lobby__names">${here.length
+            ? here.map((x) => `<span class="lobby__name">${esc(x.name)}</span>`).join('')
+            : '<p class="cut__wait">학생이 들어오면 이름이 하나씩 나타납니다</p>'}</div>
+          <p class="lobby__note">모두 이름이 보이면 시작하세요 · 문제는 모두 ${cut.total}개입니다</p>
+        </div>`;
+      break;
+    }
+
     case 'rank': {
       wide();
       const board = snap?.leaderboard ?? [];
+      const podium = board.slice(0, 3);
+      const rest = board.slice(3);
       host.innerHTML = `
-        <p class="cut__lead">🏆 잘했어요!</p>
-        <div class="rank">${board.length
-          ? board.map((r, i) =>
-              `<div class="rank__row ${i < 3 ? 'top' : ''}">
-                 <span class="rank__no">${i + 1}</span>
-                 <span class="rank__name">${esc(r.name)}</span>
-                 <span class="rank__score">${r.score.toLocaleString('ko-KR')}</span>
-               </div>`).join('')
-          : '<p class="cut__wait">퀴즈를 풀면 순위가 나옵니다</p>'}</div>
+        <p class="cut__lead">🏆 오늘의 추석왕</p>
+        ${podium.length ? `
+          <div class="podium">
+            ${podium.map((r, i) => {
+              const t = titleFor(i + 1);
+              return `<div class="podium__s podium__s--${i + 1}">
+                <span class="podium__icon">${t.icon}</span>
+                <b class="podium__name">${esc(r.name)}</b>
+                <span class="podium__title">${t.title}</span>
+                <span class="podium__score">${r.score.toLocaleString('ko-KR')}점</span>
+                <i class="podium__step">${i + 1}</i>
+              </div>`;
+            }).join('')}
+          </div>` : ''}
+        ${rest.length ? `
+          <div class="rank">${rest.map((r, i) =>
+            `<div class="rank__row">
+               <span class="rank__no">${i + 4}</span>
+               <span class="rank__name">${esc(r.name)}</span>
+               <span class="rank__score">${r.score.toLocaleString('ko-KR')}</span>
+             </div>`).join('')}</div>` : ''}
+        ${board.length ? '' : '<p class="cut__wait">퀴즈를 풀면 순위가 나옵니다</p>'}
         <button class="btn btn--sm btn--ghost" id="rankReset">퀴즈 점수 초기화</button>`;
       host.querySelector('#rankReset').onclick = () => live('reset');
       break;
@@ -488,7 +525,7 @@ document.addEventListener('click', (e) => {
     const cut = currentBeats()[state.beat];
     if (lv.dataset.live === 'open') {
       const opts = cut.q.type === 'ox' ? 2 : cut.q.options.length;
-      return live('open', { index: cut.qIndex, questionId: cut.q.id, choiceCount: opts, limitMs: 20000 });
+      return live('open', { index: cut.qIndex, questionId: cut.q.id, choiceCount: opts, limitMs: 20000, total: cut.total });
     }
     if (lv.dataset.live === 'reveal') return live('reveal');
     if (lv.dataset.live === 'next') { live('close'); return step(1); }

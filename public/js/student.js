@@ -8,7 +8,7 @@ import { SECTIONS, SECTION_BY_ID, BANDS, BAND_ORDER, resolveSection } from './da
 import { assetsFor, heroFor } from './shared/assets.js';
 import { renderStage } from './shared/stage.js';
 import { ACTIVITIES } from './activities.js';
-import { quizFor } from './data/quiz.js';
+import { quizFor, titleFor } from './data/quiz.js';
 import { hasServer } from './shared/offline.js';
 
 /** 퀴즈 보기 색·기호 — 교사 화면과 반드시 같아야 한다 */
@@ -173,7 +173,7 @@ function apply(view) {
 
   /* 라이브 퀴즈가 열려 있으면 무조건 그 화면이 먼저다 */
   if (view.live?.on) {
-    const key = `live|${view.live.questionId}|${view.live.revealed}|${view.live.answered}`;
+    const key = `live|${view.live.phase}|${view.live.questionId}|${view.live.revealed}|${view.live.answered}`;
     if (key !== renderedKey) { renderedKey = key; renderLive(view); }
     return;
   }
@@ -209,13 +209,54 @@ function apply(view) {
 
 function renderLive(view) {
   const L = view.live;
+
+  /* ── 대기실 — 다 모일 때까지 ── */
+  if (L.phase === 'lobby') {
+    $('nowLabel').textContent = '퀴즈 준비';
+    $('content').innerHTML = `
+      <div class="live live--lobby">
+        <div class="live__big">🙋</div>
+        <h2>${esc(me.name)}</h2>
+        <p>선생님 화면에 내 이름이 보이면 준비 끝이에요.</p>
+        <p class="live__hint">모두 모이면 문제 ${L.total ?? 10}개를 함께 풉니다.</p>
+      </div>`;
+    return;
+  }
+
+  /* ── 시상식 — 마지막 문제까지 끝난 뒤 ── */
+  if (L.phase === 'final') {
+    $('nowLabel').textContent = '퀴즈 끝';
+    const place = L.rank?.place ?? null;
+    const t = titleFor(place);
+    $('content').innerHTML = `
+      <div class="live live--final">
+        <div class="live__big">${t ? t.icon : '🌙'}</div>
+        ${t
+          ? `<h2>${t.title}</h2><p class="live__crown">${esc(me.name)} · ${t.why}</p>`
+          : `<h2>수고했어요</h2><p>${esc(me.name)} 친구, 끝까지 잘 풀었어요.</p>`}
+        <div class="live__score">
+          <span>내 점수</span>
+          <b>${(L.myScore ?? 0).toLocaleString('ko-KR')}</b>
+          ${L.rank ? `<span>${L.rank.place}등 / ${L.rank.of}명</span>` : ''}
+        </div>
+        ${L.podium?.length ? `
+          <div class="live__podium">
+            ${L.podium.map((r, i) => {
+              const pt = titleFor(i + 1);
+              return `<div><span>${pt.icon}</span><b>${esc(r.name)}</b><i>${pt.title}</i></div>`;
+            }).join('')}
+          </div>` : ''}
+      </div>`;
+    return;
+  }
+
   const q = quizFor(view.band).find((x) => x.id === L.questionId);
   if (!q) return;
 
   const opts = q.type === 'ox' ? ['⭕ 맞아요', '❌ 아니에요'] : q.options;
   const answerIdx = q.type === 'ox' ? (q.answer ? 0 : 1) : q.answer;
 
-  $('nowLabel').textContent = '퀴즈';
+  $('nowLabel').textContent = L.total ? `퀴즈 ${(L.index ?? 0) + 1} / ${L.total}` : '퀴즈';
 
   /* 정답 공개 뒤 */
   if (L.revealed) {

@@ -32,10 +32,13 @@ export class Classroom {
     this.reflections = new Map(); // studentId → { learned, thought, at }
     this.activityScores = new Map(); // studentId → { songpyeon, charye, ganggangsullae }
 
-    /* 라이브 퀴즈 — 온 반이 같은 문제를 동시에 푼다 (퀴즈앤·카훗 방식) */
+    /* 라이브 퀴즈 — 온 반이 같은 문제를 동시에 푼다 (퀴즈앤·카훗 방식)
+       phase: off → lobby(모이는 중) → question(푸는 중) → final(시상식) */
     this.live = {
       on: false,
+      phase: 'off',
       index: -1,        // 몇 번째 문제
+      total: 0,         // 모두 몇 문제인지 (학생 화면에 "3 / 10"을 띄우려고)
       questionId: null,
       openedAt: 0,      // 문제가 열린 시각
       limitMs: 20_000,  // 제한시간
@@ -111,17 +114,45 @@ export class Classroom {
 
   /* ── 라이브 퀴즈 ── */
 
-  /** 교사가 문제를 연다 */
-  openQuestion({ index, questionId, limitMs = 20_000, choiceCount = 4 }) {
+  /**
+   * 대기실을 연다 — 아이들이 다 모였는지 눈으로 확인하는 자리.
+   * 여기서 점수를 비운다. 시작 전에 비워야 연습으로 누른 점수가 안 섞인다.
+   */
+  openLobby({ total = 10 } = {}) {
+    this.points.clear();
+    this.quizAnswers.clear();
     this.live = {
+      ...this.live,
       on: true,
+      phase: 'lobby',
+      index: -1,
+      total,
+      questionId: null,
+      revealed: false,
+    };
+    this.broadcast('live');
+  }
+
+  /** 교사가 문제를 연다 */
+  openQuestion({ index, questionId, limitMs = 20_000, choiceCount = 4, total }) {
+    this.live = {
+      ...this.live,
+      on: true,
+      phase: 'question',
       index,
+      total: total ?? this.live.total,
       questionId,
       openedAt: Date.now(),
       limitMs,
       revealed: false,
       choiceCount,
     };
+    this.broadcast('live');
+  }
+
+  /** 마지막 문제까지 끝나고 상을 준다 */
+  showFinal() {
+    this.live = { ...this.live, on: true, phase: 'final', questionId: null, revealed: true };
     this.broadcast('live');
   }
 
@@ -146,7 +177,7 @@ export class Classroom {
   }
 
   closeLive() {
-    this.live = { ...this.live, on: false, revealed: false, index: -1, questionId: null };
+    this.live = { ...this.live, on: false, phase: 'off', revealed: false, index: -1, questionId: null };
     this.broadcast('live');
   }
 
@@ -258,7 +289,9 @@ export class Classroom {
       /* 라이브 퀴즈 — 공개 전에는 정답도, 남이 뭘 골랐는지도 주지 않는다 */
       live: {
         on: this.live.on,
+        phase: this.live.phase,
         index: this.live.index,
+        total: this.live.total,
         questionId: this.live.questionId,
         revealed: this.live.revealed,
         choiceCount: this.live.choiceCount,
@@ -271,6 +304,8 @@ export class Classroom {
           : null,
         myScore: this.points.get(studentId) ?? 0,
         rank: this.live.revealed ? this.rankOf(studentId) : null,
+        /* 시상식에서만 — 단상에 오른 셋을 모두에게 보여준다 */
+        podium: this.live.phase === 'final' ? this.leaderboard(3) : null,
       },
     };
   }

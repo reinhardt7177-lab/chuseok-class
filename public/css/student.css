@@ -709,3 +709,395 @@ body { min-height: 100dvh; }
 }
 .solo-door--only span { font-size: 14px; line-height: 1.7; color: var(--moon-dim); }
 .solo-door--only .btn { font-size: 16px; padding: 12px 26px; }
+
+/* ─────────────── 활동 고르기 ───────────────
+   .menu / .menucard / .backbtn 은 student.js 가 그리는데
+   여기에 스타일이 없어서, 버튼이 글자처럼 한 줄로 흘러
+   휴대폰에서 좌우로 잘려 나갔다. */
+
+.menu {
+  padding: var(--s5) var(--s4) var(--s8);
+  max-width: 620px;
+  margin: 0 auto;
+  width: 100%;
+}
+.menu__head { text-align: center; margin-bottom: var(--s5); }
+.menu__head h2 { font-size: 25px; margin-bottom: var(--s2); }
+.menu__head p { font-size: 14.5px; color: var(--moon-dim); margin: 0; line-height: 1.7; }
+.menu__head b { color: var(--moon-glow); font-weight: 400; }
+
+/* 손가락으로 누르는 화면이라 두 칸이 기본 — 칸이 넓어야 잘 눌린다 */
+.menu__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s3);
+}
+@media (min-width: 560px) { .menu__grid { grid-template-columns: repeat(3, 1fr); } }
+
+.menucard {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--s2);
+  min-height: 116px;
+  padding: var(--s4) var(--s3);
+  border-radius: var(--r-md);
+  background: rgba(36, 43, 62, .82);
+  border: 1px solid var(--ink-line);
+  color: var(--moon);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .14s var(--ease), border-color .18s, background .18s;
+}
+.menucard__icon { font-size: 34px; line-height: 1; }
+.menucard b { font-family: var(--font-title); font-size: 15px; font-weight: 700; }
+.menucard:hover,
+.menucard:focus-visible {
+  outline: none;
+  border-color: var(--moon-glow);
+  background: rgba(242, 201, 107, .1);
+}
+.menucard:active { transform: scale(.97); }
+
+/* 활동 안에서 메뉴로 돌아가는 단추 */
+.backbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--s4) 0 0 var(--s4);
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: rgba(246, 236, 210, .08);
+  border: 1px solid var(--ink-line);
+  color: var(--moon-dim);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .18s, border-color .18s;
+}
+.backbtn:hover,
+.backbtn:focus-visible { outline: none; color: var(--moon-glow); border-color: var(--moon-glow); }
+
+/* ─────────────── 퀴즈 대기실과 시상식 ─────────────── */
+
+.live--lobby h2,
+.live--final h2 {
+  font-size: 28px;
+  margin-bottom: var(--s2);
+}
+.live--lobby p { color: var(--moon-dim); font-size: 15px; line-height: 1.75; margin: 0; }
+.live__hint { margin-top: var(--s3) !important; font-size: 13.5px !important; color: var(--moon-glow) !important; }
+
+.live--final .live__crown { color: var(--moon-glow); font-size: 15px; margin: 0; }
+
+/* 단상에 오른 셋 — 내가 아니어도 누가 받았는지는 보여준다 */
+.live__podium {
+  display: flex;
+  justify-content: center;
+  gap: var(--s3);
+  margin-top: var(--s5);
+  flex-wrap: wrap;
+}
+.live__podium div {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 88px;
+  padding: var(--s3) var(--s2);
+  border-radius: var(--r-md);
+  background: rgba(36, 43, 62, .8);
+  border: 1px solid var(--ink-line);
+}
+.live__podium span { font-size: 26px; line-height: 1; }
+.live__podium b { font-size: 14px; color: var(--moon); }
+.live__podium i { font-style: normal; font-size: 11.5px; color: var(--moon-glow); }
+
+/* ════════════════════════════════════════════════════════════
+   라이브 퀴즈 — 손가락으로 누르는 큰 색 버튼
+   보기 색과 기호는 student.js의 CHOICE와 짝이다.
+   선생님 화면의 막대 색과도 같아야 "빨간 걸 누른 사람"이 통한다.
+   ════════════════════════════════════════════════════════════ */
+
+.live {
+  padding: var(--s5) var(--s4) var(--s8);
+  max-width: 620px;
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+}
+.live__big { font-size: 68px; line-height: 1; margin-bottom: var(--s3); }
+.live h2 { font-size: 26px; margin-bottom: var(--s2); }
+
+/* ── 문제 고르기 ── */
+.live__q {
+  font-family: var(--font-title);
+  font-size: clamp(19px, 5vw, 26px);
+  line-height: 1.5;
+  color: var(--moon);
+  margin: 0 0 var(--s4);
+}
+
+.live__timer {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(246, 236, 210, .12);
+  overflow: hidden;
+  margin-bottom: var(--s4);
+}
+.live__timer i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--moon-glow), var(--persimmon));
+}
+
+.live__opts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s3);
+}
+/* 보기가 홀수면 마지막 하나가 한 줄을 다 쓴다 (3지선다) */
+.live__opts > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+.live__opt {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--s3);
+  min-height: 92px;
+  padding: var(--s4) var(--s3);
+  border-radius: var(--r-md);
+  border: 2px solid transparent;
+  background: var(--c);
+  color: #fff;
+  font: inherit;
+  font-size: clamp(15px, 4vw, 19px);
+  font-weight: 700;
+  text-align: left;
+  line-height: 1.4;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .34);
+  transition: transform .1s var(--ease), box-shadow .1s, opacity .2s;
+}
+.live__opt:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, .34); }
+.live__opt:disabled { cursor: default; }
+.live__opt--sent { border-color: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, .28); }
+
+.live__mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .22);
+  font-size: 21px;
+}
+
+/* ── 답을 보내고 기다리는 중 ── */
+.live--wait .live__pick {
+  width: 116px;
+  height: 116px;
+  margin: 0 auto var(--s4);
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 54px;
+  color: #fff;
+  background: var(--c);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .3);
+  animation: beat-soft 1.5s ease-in-out infinite;
+}
+@keyframes beat-soft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.live--wait p { color: var(--moon-dim); margin: 0; }
+
+/* ── 정답 공개 ── */
+.live__answer {
+  font-family: var(--font-title);
+  font-size: 18px;
+  color: var(--moon-glow);
+  margin: 0 0 var(--s3);
+}
+.live__why {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--moon-dim);
+  margin: 0 0 var(--s5);
+}
+.live__score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s3);
+  padding: var(--s3) var(--s5);
+  border-radius: 999px;
+  background: rgba(36, 43, 62, .85);
+  border: 1px solid var(--ink-line);
+}
+.live__score span { font-size: 12.5px; color: var(--moon-dim); }
+.live__score b { font-family: var(--font-title); font-size: 26px; color: var(--moon-glow); }
+
+.live--ok .live__big { animation: pop-big .45s var(--ease); }
+@keyframes pop-big { from { transform: scale(.5); opacity: 0; } }
+
+/* ════════════════ 강강술래 ════════════════ */
+
+.gg {
+  position: relative;
+  width: min(340px, 86vw);
+  aspect-ratio: 1;
+  margin: 0 auto var(--s4);
+  display: grid;
+  place-items: center;
+}
+.gg.miss { animation: shake .28s; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  75% { transform: translateX(7px); }
+}
+
+/* 무용수가 원을 이룬다 — --spin만 바꾸면 원 전체가 돈다 */
+.gg__ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--spin, 0deg));
+  transition: transform .5s var(--ease);
+}
+.gg__dancer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22%;
+  margin: -11% 0 0 -11%;
+  transform: rotate(var(--a)) translateY(calc(min(340px, 86vw) / -2.4)) rotate(calc(var(--a) * -1));
+}
+.gg__dancer img { width: 100%; display: block; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .5)); }
+
+/* 가운데 보름달 = 두드리는 자리 */
+.gg__moon {
+  position: relative;
+  z-index: 2;
+  width: 46%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: none;
+  background: radial-gradient(circle at 38% 34%, #fff8e2, var(--moon-glow) 58%, #cf9a35);
+  color: #4a3410;
+  font-family: var(--font-title);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--glow-moon);
+  transition: transform .08s var(--ease);
+}
+.gg__moon:active { transform: scale(.94); }
+.gg__moon.pulse { animation: moon-hit .24s var(--ease); }
+@keyframes moon-hit {
+  from { transform: scale(1); box-shadow: var(--glow-moon); }
+  50% { transform: scale(1.12); box-shadow: 0 0 70px rgba(242, 201, 107, .85); }
+}
+
+.gg__combo {
+  position: absolute;
+  bottom: 3%;
+  font-family: var(--font-title);
+  font-size: 19px;
+  color: var(--moon-glow);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .8);
+  pointer-events: none;
+}
+.gg__combo.pop { animation: pop-big .3s var(--ease); }
+
+/* 메기고 받는 소리 */
+.gg__call { display: grid; gap: 4px; text-align: center; margin-bottom: var(--s4); min-height: 52px; }
+.gg__lead { font-size: 15px; color: var(--moon-dim); }
+.gg__resp { font-family: var(--font-title); font-size: 21px; color: var(--moon-glow); }
+
+/* ════════════════ 소원 벽 ════════════════ */
+
+.wall { display: grid; gap: var(--s2); }
+.wall__item {
+  padding: 11px var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(36, 43, 62, .7);
+  border: 1px solid var(--ink-line);
+  border-left: 3px solid var(--moon-glow);
+  font-size: 14.5px;
+  line-height: 1.6;
+  animation: slide-in .3s var(--ease) backwards;
+}
+@keyframes slide-in { from { opacity: 0; transform: translateY(6px); } }
+.wall .empty { text-align: center; padding: var(--s5); }
+
+/* ════════════════ 글 적는 칸 ════════════════ */
+
+.textbox {
+  width: 100%;
+  min-height: 108px;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(16, 19, 28, .6);
+  border: 1px solid var(--ink-line);
+  color: var(--moon);
+  font: inherit;
+  font-size: 16px;            /* 16px 밑으로 내리면 아이폰이 화면을 확대한다 */
+  line-height: 1.7;
+  resize: vertical;
+}
+.textbox::placeholder { color: rgba(205, 195, 171, .45); }
+.textbox:focus { outline: none; border-color: var(--moon-glow); background: rgba(16, 19, 28, .8); }
+
+/* ════════════════ 혼자 학습 ════════════════ */
+
+.solo-nav {
+  display: flex;
+  justify-content: center;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4) 0;
+}
+.solo-nav button {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(36, 43, 62, .8);
+  border: 1px solid var(--ink-line);
+  color: var(--moon-dim);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.solo-nav button[aria-pressed="true"] {
+  border-color: var(--moon-glow);
+  color: var(--moon-glow);
+  background: rgba(242, 201, 107, .12);
+}
+
+.solo-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  background: rgba(13, 16, 24, .96);
+  border-top: 1px solid var(--ink-line);
+  backdrop-filter: blur(14px);
+}
+.solo-foot #soloPos { font-size: 13px; color: var(--moon-dim); font-variant-numeric: tabular-nums; }
+
+.solo-door {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-top: var(--s5);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--ink-line);
+}
+.solo-door span { font-size: 13px; color: var(--moon-dim); }
