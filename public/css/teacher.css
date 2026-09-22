@@ -129,7 +129,11 @@ body { overflow: hidden; }
 @keyframes line-in { to { opacity: 1; transform: none; } }
 
 .scene__keyword {
-  flex-shrink: 0;
+  /* 줄어들 수 있어야 한다. flex-shrink:0 이면 화면이 좁을 때
+     오른쪽으로 밀려 나가 잘린다(body가 overflow:hidden이라 스크롤도 안 된다). */
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 38%;
   align-self: flex-start;
   font-family: var(--font-title);
   font-size: clamp(15px, 1.5vw, 20px);
@@ -199,7 +203,7 @@ body { overflow: hidden; }
 }
 .step.done { color: var(--jade-soft); }
 
-.bar__nav { display: flex; gap: var(--s2); }
+.bar__nav { display: flex; gap: var(--s2); flex-shrink: 0; }
 
 .clock {
   font-variant-numeric: tabular-nums;
@@ -217,14 +221,30 @@ body { overflow: hidden; }
    ============================================================ */
 
 
+/* 브라우저를 확대하면(Ctrl +) 화면이 좁아진 것과 같다.
+   1100px 아래에서는 단계 이름을 빼고 그림만 남겨 한 줄에 들어가게 한다.
+   이걸 안 하면 이름들이 가로로 밀려 '학생 활동'과 인원수가 잘려 나간다. */
+@media (max-width: 1100px) {
+  .step small { display: none; }
+  .step { height: 36px; }
+  .clock { min-width: auto; font-size: 13px; }
+  .bar { gap: var(--s3); padding: var(--s3) var(--s4); }
+}
+
 @media (max-width: 760px) {
   .bar { flex-wrap: wrap; gap: var(--s2); padding: var(--s2) var(--s3); }
   .steps { order: 3; width: 100%; flex-basis: 100%; }
-  .step small { display: none; }
   .step { height: 34px; }
-  .clock { min-width: auto; font-size: 13px; }
   .scene__keyword { display: none; }
   .facts { display: none; }   /* 좁으면 본문 읽기가 우선 */
+}
+
+/* 세로가 짧을 때 — 많이 확대했거나 창을 납작하게 줄인 경우.
+   제목이 화면 위로 잘려 올라가지 않게 곁다리를 먼저 덜어낸다. */
+@media (max-height: 460px) {
+  .facts { display: none; }
+  .beats { display: none; }
+  .scene__body { padding: var(--s3) clamp(20px, 4vw, 48px) var(--s4); gap: var(--s3); }
 }
 
 
@@ -435,7 +455,7 @@ body { overflow: hidden; }
 .connectcut__steps b { color: var(--moon-glow); }
 
 /* 아래 바 오른쪽 */
-.bar__side { display: flex; align-items: center; gap: var(--s2); }
+.bar__side { display: flex; align-items: center; gap: var(--s2); flex-shrink: 0; }
 .chip {
   padding: 8px 14px;
   border-radius: 999px;
@@ -460,7 +480,6 @@ body { overflow: hidden; }
 @media (max-width: 760px) {
   .bar { flex-wrap: wrap; gap: var(--s2); padding: var(--s2) var(--s3); }
   .steps { order: 3; width: 100%; flex-basis: 100%; }
-  .step small { display: none; }
   .step { height: 34px; }
   .scene__keyword { display: none; }
 }
