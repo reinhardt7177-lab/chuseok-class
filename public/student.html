@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>추석 계기교육 — 학생</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2713%27 fill=%27%23f2c96b%27/%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%272.5%27 fill=%27%23d9a53f%27/%3E%3Ccircle cx=%2720%27 cy=%2718%27 r=%273.5%27 fill=%27%23d9a53f%27/%3E%3Ccircle cx=%2713%27 cy=%2721%27 r=%271.8%27 fill=%27%23d9a53f%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/student.css">
+</head>
+<body>
+
+<div class="wrap" id="wrap">
+
+  <!-- ─────────── 입장 ─────────── -->
+  <section class="enter stage" id="enter" aria-label="수업 입장">
+    <div class="stage__body enter__card">
+      <h1 class="enter__title">🌕 한가위</h1>
+      <p class="enter__sub">선생님이 알려준 번호를 넣고<br>수업에 들어와요.</p>
+
+      <div class="err" id="err" hidden></div>
+
+      <form id="joinForm">
+        <div class="field">
+          <label for="codeInput">입장 코드 여섯 자리</label>
+          <input class="input input--code" id="codeInput" inputmode="numeric" pattern="[0-9]*"
+                 maxlength="6" placeholder="000000" autocomplete="off" required>
+        </div>
+        <div class="field">
+          <label for="nameInput">내 이름</label>
+          <input class="input" id="nameInput" maxlength="12" placeholder="이름을 적어요" autocomplete="off" required>
+        </div>
+        <button class="btn btn--primary btn--lg" type="submit" style="width:100%" id="joinBtn">들어가기</button>
+      </form>
+
+      <div class="solo-door">
+        <span>선생님 없이 혼자 볼 수도 있어요</span>
+        <button class="btn btn--sm btn--ghost" id="soloBtn">혼자 해보기 →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 학습 ─────────── -->
+  <div id="main" hidden>
+    <header class="top">
+      <span class="dot" id="conn" title="연결 상태"></span>
+      <span class="top__me" id="meName">친구</span>
+      <span class="top__now" id="nowLabel">수업을 기다리는 중</span>
+    </header>
+
+    <!-- 혼자 학습일 때만 보이는 장면 이동 -->
+    <nav class="solo-nav" id="soloNav" hidden></nav>
+
+    <div id="content"></div>
+
+    <div class="solo-foot" id="soloFoot" hidden>
+      <button class="btn btn--sm" id="soloPrev">◀ 이전</button>
+      <span id="soloPos"></span>
+      <button class="btn btn--sm btn--primary" id="soloNext">다음 ▶</button>
+    </div>
+  </div>
+
+</div>
+
+<script type="module" src="js/student.js"></script>
+</body>
+</html>

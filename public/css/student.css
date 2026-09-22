@@ -1,0 +1,711 @@
+/* ============================================================
+   학생용 개별 학습 — 태블릿·크롬북 손가락 조작 기준
+   터치 표적은 최소 44px, 글자는 16px 이상.
+   ============================================================ */
+
+body { min-height: 100dvh; }
+
+.wrap {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─────────────── 입장 ─────────────── */
+
+.enter {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--s5);
+  position: relative;
+  overflow: hidden;
+}
+
+.enter__card {
+  position: relative;
+  z-index: 3;
+  width: min(420px, 100%);
+  background: rgba(16, 19, 28, .86);
+  border: 1px solid var(--ink-line);
+  border-radius: var(--r-xl);
+  padding: var(--s6) var(--s5);
+  backdrop-filter: blur(14px);
+  text-align: center;
+}
+
+.enter__title { font-size: 30px; margin-bottom: var(--s2); }
+.enter__sub { font-size: 14.5px; color: var(--moon-dim); margin: 0 0 var(--s6); line-height: 1.7; }
+
+.field { text-align: left; margin-bottom: var(--s4); }
+.field label { display: block; font-size: 13px; color: var(--moon-glow); margin-bottom: 7px; }
+
+.input {
+  width: 100%;
+  padding: 15px var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(246, 236, 210, .08);
+  border: 1px solid var(--ink-line);
+  color: var(--moon);
+  font-size: 17px;
+  transition: border-color .18s, background .18s;
+}
+.input:focus { outline: none; border-color: var(--moon-glow); background: rgba(246, 236, 210, .13); }
+.input::placeholder { color: rgba(246, 236, 210, .3); }
+
+.input--code {
+  font-family: var(--font-title);
+  font-size: 30px;
+  letter-spacing: .3em;
+  text-align: center;
+  padding: 16px;
+}
+
+.err {
+  background: rgba(217, 83, 79, .16);
+  border: 1px solid rgba(217, 83, 79, .5);
+  border-radius: var(--r-sm);
+  padding: 11px var(--s3);
+  font-size: 14px;
+  color: #ffb3b0;
+  margin-bottom: var(--s4);
+  line-height: 1.55;
+}
+
+/* ─────────────── 학습 화면 ─────────────── */
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 11px var(--s4);
+  background: rgba(13, 16, 24, .96);
+  border-bottom: 1px solid var(--ink-line);
+  backdrop-filter: blur(14px);
+}
+.top__me { font-size: 14px; color: var(--moon); font-weight: 700; }
+.top__now { flex: 1; font-size: 13px; color: var(--moon-dim); text-align: right; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--jade); flex-shrink: 0; }
+.dot.off { background: var(--no); }
+
+.hero {
+  position: relative;
+  min-height: 34vh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.hero__body { position: relative; z-index: 3; padding: var(--s5) var(--s4) var(--s4); width: 100%; }
+.hero__tag { display: flex; gap: var(--s2); margin-bottom: var(--s3); flex-wrap: wrap; }
+.hero__title { font-size: clamp(25px, 6.4vw, 34px); margin-bottom: var(--s2); text-shadow: 0 3px 20px rgba(0,0,0,.8); }
+.hero__headline { font-family: var(--font-title); font-size: 17px; color: var(--moon-glow); margin: 0; }
+
+.read { padding: var(--s5) var(--s4) var(--s7); }
+
+.read p {
+  font-size: 17px;
+  line-height: 1.85;
+  color: #f2ecdc;
+  margin: 0 0 var(--s4);
+}
+
+.read__facts { display: grid; gap: var(--s2); margin: var(--s5) 0; }
+.read__fact {
+  background: rgba(36, 43, 62, .6);
+  border: 1px solid var(--ink-line);
+  border-left: 3px solid var(--jade);
+  border-radius: var(--r-sm);
+  padding: var(--s3) var(--s4);
+}
+.read__fact b { display: block; color: var(--moon-glow); font-family: var(--font-title); font-size: 16px; margin-bottom: 3px; }
+.read__fact span { font-size: 14px; color: var(--moon-dim); line-height: 1.6; }
+
+.gallery { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); margin: var(--s5) 0; }
+.gallery img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: var(--r-sm); }
+.gallery figure { margin: 0; }
+.gallery figcaption { font-size: 11.5px; color: var(--moon-dim); padding: 5px 2px; line-height: 1.4; }
+
+/* 기다림 */
+.wait {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--s7) var(--s5);
+  text-align: center;
+}
+.wait__moon {
+  width: 92px; height: 92px;
+  border-radius: 50%;
+  margin: 0 auto var(--s5);
+  background: radial-gradient(circle at 38% 34%, #fff8e2, var(--moon-glow) 55%, #d19f3c);
+  box-shadow: var(--glow-moon);
+  animation: floaty 7s ease-in-out infinite;
+}
+.wait h2 { font-size: 23px; margin-bottom: var(--s3); }
+.wait p { font-size: 15px; color: var(--moon-dim); line-height: 1.75; margin: 0; }
+
+/* ─────────────── 활동 공통 ─────────────── */
+
+.act {
+  padding: var(--s5) var(--s4) var(--s8);
+  max-width: 620px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.act__head { text-align: center; margin-bottom: var(--s5); }
+.act__head h2 { font-size: 25px; margin-bottom: var(--s2); }
+.act__head p { font-size: 14.5px; color: var(--moon-dim); margin: 0; line-height: 1.7; }
+
+.act__done {
+  text-align: center;
+  padding: var(--s6) var(--s4);
+}
+.act__done .big { font-size: 56px; margin-bottom: var(--s3); }
+
+.tap {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  padding: var(--s4);
+  margin-bottom: var(--s2);
+  border-radius: var(--r-md);
+  background: rgba(36, 43, 62, .66);
+  border: 2px solid var(--ink-line);
+  color: var(--moon);
+  font-size: 16.5px;
+  text-align: left;
+  line-height: 1.5;
+  transition: transform .14s var(--ease), border-color .16s, background .16s;
+}
+.tap:hover { background: rgba(46, 55, 78, .8); }
+.tap:active { transform: scale(.985); }
+.tap.picked   { border-color: var(--moon-glow); background: rgba(242, 201, 107, .14); }
+.tap.right    { border-color: var(--ok); background: rgba(74, 155, 120, .2); }
+.tap.wrong    { border-color: var(--no); background: rgba(217, 83, 79, .18); }
+.tap[disabled] { opacity: .55; }
+
+.why {
+  background: rgba(74, 155, 120, .12);
+  border: 1px solid rgba(74, 155, 120, .38);
+  border-radius: var(--r-md);
+  padding: var(--s4);
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #bfe6d1;
+  margin: var(--s3) 0;
+  animation: line-in .35s var(--ease) both;
+}
+.why.no { background: rgba(224, 164, 88, .12); border-color: rgba(224, 164, 88, .4); color: #f0cf9b; }
+
+.progress {
+  display: flex;
+  gap: 4px;
+  margin-bottom: var(--s5);
+}
+.progress i {
+  flex: 1; height: 5px;
+  border-radius: 99px;
+  background: rgba(246, 236, 210, .12);
+  transition: background .3s;
+}
+.progress i.on  { background: var(--moon-glow); }
+.progress i.ok  { background: var(--ok); }
+.progress i.bad { background: var(--no); }
+
+/* ============================================================
+   송편 빚기 — 치대고, 소 넣고, 쓸어서 빚는다
+   ============================================================ */
+
+.sp__stage {
+  position: relative;
+  width: 180px;
+  margin: 0 auto var(--s4);
+  display: grid;
+  place-items: center;
+  touch-action: none;
+}
+.sp__stage--big { width: 230px; }
+
+.sp__img {
+  width: 100%;
+  display: block;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .45));
+  transition: filter .2s, transform .12s;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sp__fill {
+  position: absolute;
+  top: 44%;
+  font-size: 26px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .45));
+  pointer-events: none;
+}
+.sp__fill.drop { animation: sp-drop .45s var(--ease); }
+@keyframes sp-drop {
+  0% { transform: translateY(-46px) scale(1.5); opacity: 0; }
+  60% { transform: translateY(4px) scale(1); opacity: 1; }
+  100% { transform: none; }
+}
+
+/* 치댈 때 눌리는 느낌 */
+.sp__stage--knead { cursor: pointer; }
+.sp__stage.press .sp__img { transform: scaleY(.9) scaleX(1.05); }
+
+/* 소를 끌어올 때 */
+.sp__stage--open.over .sp__img { transform: scale(1.06); filter: drop-shadow(0 0 16px rgba(242,201,107,.8)); }
+
+/* 쓸어서 빚을 때 안내 고리 */
+.sp__hintring {
+  display: none;
+  position: absolute;
+  inset: -10px;
+  border: 2px dashed rgba(242, 201, 107, .5);
+  border-radius: 50%;
+  animation: sp-ring 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes sp-ring { 50% { transform: scale(1.06); opacity: .5; } }
+
+/* 김 */
+.sp__steam { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.sp__stage--steaming .sp__steam span {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  width: 12px; height: 12px;
+  margin-left: var(--x, 0);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.7), transparent 70%);
+  animation: sp-steam 2.2s ease-out infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes sp-steam {
+  0% { transform: translateY(0) scale(.6); opacity: 0; }
+  25% { opacity: .75; }
+  100% { transform: translateY(-90px) scale(2.4); opacity: 0; }
+}
+
+/* 조작 부분 */
+.sp__big {
+  display: block;
+  width: 100%;
+  padding: var(--s5);
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--persimmon), #c9582a);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(228, 112, 58, .35);
+  transition: transform .1s;
+}
+.sp__big:active { transform: scale(.97); }
+.sp__big[disabled] { opacity: .45; }
+
+.sp__count { text-align: center; font-size: 14px; color: var(--moon-dim); margin: var(--s3) 0 0; }
+.sp__count b { color: var(--moon-glow); font-size: 20px; font-variant-numeric: tabular-nums; }
+
+.sp__meter {
+  height: 10px;
+  border-radius: 99px;
+  background: rgba(246, 236, 210, .12);
+  overflow: hidden;
+  margin: var(--s3) 0;
+}
+.sp__meter i {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--jade), var(--moon-glow));
+  transition: width .1s linear;
+}
+
+.sp__opts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: var(--s2);
+}
+.sp__opt {
+  padding: var(--s3) var(--s2);
+  border-radius: var(--r-md);
+  background: rgba(36, 43, 62, .7);
+  border: 2px solid var(--ink-line);
+  color: var(--moon);
+  text-align: center;
+  transition: all .16s var(--ease);
+}
+.sp__opt em { display: block; font-style: normal; font-size: 30px; margin-bottom: 5px; }
+.sp__opt b { display: block; font-size: 15px; }
+.sp__opt:hover:not([disabled]) { border-color: var(--moon-glow); transform: translateY(-3px); }
+.sp__opt--pic img { width: 72px; display: block; margin: 0 auto 4px; }
+
+.sp__tray { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s2); }
+.sp__pill {
+  padding: var(--s3) 4px;
+  border-radius: var(--r-md);
+  background: rgba(36, 43, 62, .8);
+  border: 2px solid var(--ink-line);
+  color: var(--moon);
+  text-align: center;
+  touch-action: none;
+  transition: transform .14s var(--ease), border-color .16s;
+}
+.sp__pill em { display: block; font-style: normal; font-size: 26px; }
+.sp__pill b { display: block; font-size: 12.5px; margin-top: 2px; }
+.sp__pill:hover { border-color: var(--moon-glow); transform: translateY(-3px); }
+
+.sp__ghost {
+  position: fixed;
+  z-index: 90;
+  font-size: 34px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .5));
+}
+
+/* ============================================================
+   어휘 카드 — 뒤집어 기억하기
+   ============================================================ */
+
+.mem__bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: var(--moon-dim);
+  margin-bottom: var(--s3);
+  padding: 0 2px;
+}
+.mem__bar b { color: var(--moon-glow); font-size: 16px; font-variant-numeric: tabular-nums; }
+
+.mem {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
+  gap: var(--s2);
+}
+
+.mem__card {
+  aspect-ratio: 3 / 4;
+  perspective: 700px;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.mem__inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .42s cubic-bezier(.4, 1.3, .5, 1);
+}
+.mem__card.open .mem__inner,
+.mem__card.done .mem__inner { transform: rotateY(180deg); }
+
+.mem__back,
+.mem__face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  padding: var(--s2);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* 엎어 놓은 면 — 달 무늬 */
+.mem__back {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(242, 201, 107, .22), transparent 62%),
+    linear-gradient(150deg, #212840, #161b2b);
+  border: 2px solid var(--ink-line);
+}
+.mem__back i { font-style: normal; font-size: 26px; opacity: .65; }
+
+/* 뒤집은 면 */
+.mem__face {
+  transform: rotateY(180deg);
+  background: rgba(36, 43, 62, .92);
+  border: 2px solid var(--ink-line);
+  color: var(--moon);
+  font-size: 13px;
+}
+.mem__face--term {
+  font-family: var(--font-title);
+  font-size: 18px;
+  color: var(--moon-glow);
+}
+
+.mem__card.done .mem__face {
+  border-color: var(--ok);
+  background: rgba(74, 155, 120, .22);
+}
+.mem__card.done { opacity: .72; pointer-events: none; }
+.mem__card.wrong .mem__face { border-color: var(--no); background: rgba(217, 83, 79, .2); }
+
+@media (min-width: 560px) {
+  .mem { grid-template-columns: repeat(4, 1fr); max-width: 520px; margin: 0 auto; }
+}
+
+/* ============================================================
+   차례상 차리기 — 상에 끌어다 놓기
+   실제 5열(과일 줄)을 여덟 자리로 만든 것.
+   ============================================================ */
+
+.act--wide { max-width: 860px; }
+
+.act__step {
+  display: block;
+  font-size: 13.5px;
+  color: var(--moon-glow);
+  margin: var(--s4) 0 var(--s2);
+  letter-spacing: .02em;
+}
+.act__step small { color: var(--moon-dim); font-size: 12px; margin-left: 6px; }
+
+/* 병풍을 등지고 상이 놓인다 */
+.ct__room {
+  position: relative;
+  padding: clamp(58px, 14vw, 104px) 0 0;
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.ct__room::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: clamp(92px, 22vw, 160px);
+  background: url('../assets/img/byeongpung.jpg') center center / cover no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+.ct__room::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(12,14,20,.16) 0%, rgba(12,14,20,.45) 60%, rgba(12,14,20,.7) 100%);
+  pointer-events: none;
+}
+.ct__room > * { position: relative; z-index: 1; }
+
+/* 줄 규칙 — 상 밖 범례 */
+.ct__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: var(--s3);
+}
+.ct__rule {
+  flex: 1 1 auto;
+  padding: 5px 10px;
+  border-radius: var(--r-sm);
+  background: rgba(36, 43, 62, .7);
+  border: 1px solid var(--ink-line);
+  border-left: 3px solid var(--moon-glow);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.ct__rule b { display: block; font-size: 12.5px; color: var(--moon-glow); font-family: var(--font-title); }
+.ct__rule i { font-style: normal; font-size: 11px; color: var(--moon-dim); }
+
+/* ── 상 — 넓고 낮게 ── */
+.ct__stand {
+  width: min(420px, 100%);
+  margin: 0 auto;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, .6));
+}
+
+.ct__surface {
+  padding: 5px 2% 15px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,.03) 14%, rgba(255,226,180,.1) 100%),
+    repeating-linear-gradient(90deg, rgba(90,52,24,.16) 0 3px, transparent 3px 13px),
+    linear-gradient(180deg, #784926 0%, #8f5c36 50%, #9e6a3e 100%);
+  border-top: 1px solid rgba(255, 216, 168, .3);
+  border-radius: 6px 6px 0 0;
+  clip-path: polygon(2.5% 0, 97.5% 0, 100% 100%, 0 100%);
+}
+
+/* 한 줄 — 간격을 바짝 붙인다 */
+.ct__row {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+}
+.ct__rownum {
+  position: absolute;
+  left: 0;
+  bottom: 4px;
+  font-size: 10px;
+  color: rgba(255, 238, 200, .4);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .9);
+}
+.ct__spots {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1px;
+  padding: 0;
+}
+
+/* 음식 놓을 자리 — 테두리 없이, 상 위에 그냥 놓인다 */
+.ct__slot {
+  position: relative;
+  /* 그릇 크기만큼만 자리를 잡아 서로 바짝 붙게 한다.
+     줄 폭을 나눠 가지면 체크 표시가 그릇에서 멀어진다. */
+  flex: 0 0 auto;
+  width: clamp(62px, 21vw, 96px);
+  height: clamp(40px, 13vw, 64px);
+  display: grid;
+  place-items: end center;
+  border-radius: 6px;
+  transition: background .16s, transform .12s;
+}
+.ct__mark {
+  position: absolute;
+  bottom: 4px;
+  width: 62%;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 238, 200, .4);
+  background: rgba(0, 0, 0, .24);
+}
+.ct__slot.picked-target .ct__mark { border-color: var(--moon-glow); background: rgba(242,201,107,.22); }
+.ct__slot.over { background: rgba(242, 201, 107, .3); transform: translateY(-3px); }
+.ct__slot.has { background: radial-gradient(ellipse at 50% 92%, rgba(0,0,0,.45), transparent 60%); }
+
+.ct__slot img {
+  max-width: 100%;
+  max-height: 88%;      /* 아래 이름표 자리를 남긴다 */
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .6));
+}
+.ct__slot b {
+  position: absolute;
+  bottom: 0;
+  font-size: 9.5px;
+  color: #fff3da;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
+  pointer-events: none;
+}
+
+/* 맞고 틀림은 작은 표시로만 — 네모 테두리는 상처럼 안 보인다 */
+.ct__slot.ok::after,
+.ct__slot.no::after {
+  content: '✓';
+  position: absolute;
+  bottom: 11px; right: 0;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 10px; font-weight: 700;
+  background: var(--ok); color: #fff;
+}
+.ct__slot.no::after { content: '✕'; background: var(--no); }
+
+/* 상판 두께 */
+.ct__edge {
+  height: 11px;
+  background: linear-gradient(180deg, #5f3418 0%, #46250f 55%, #341a09 100%);
+  border-radius: 0 0 4px 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 205, 150, .45);
+}
+
+/* 다리 */
+.ct__legs { display: flex; justify-content: space-between; padding: 0 10%; margin-top: -1px; }
+.ct__legs i {
+  width: 12px;
+  height: clamp(14px, 3vw, 24px);
+  background: linear-gradient(90deg, #2e1707, #4d2a12 42%, #381d0c);
+  border-radius: 0 0 4px 4px;
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 16% 100%);
+}
+
+/* 방향 — 상 아래에 */
+.ct__dirs {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: rgba(255, 240, 210, .75);
+  padding: 5px 4% 0;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, .9);
+}
+.ct__dirs small { color: rgba(255, 240, 210, .5); margin-left: 3px; font-size: 10.5px; }
+
+/* 아래 쟁반 */
+.ct__tray {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s2);
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  background: rgba(246, 236, 210, .05);
+  border: 1px solid var(--ink-line);
+}
+@media (min-width: 620px) { .ct__tray { grid-template-columns: repeat(6, 1fr); } }
+
+.ct__item {
+  display: grid;
+  gap: 2px;
+  padding: 6px 3px;
+  border-radius: var(--r-sm);
+  background: rgba(36, 43, 62, .8);
+  border: 2px solid var(--ink-line);
+  color: var(--moon);
+  touch-action: none;
+  transition: transform .14s var(--ease), border-color .16s, opacity .2s;
+}
+.ct__item img { width: 100%; display: block; pointer-events: none; }
+.ct__item b { font-size: 12px; }
+.ct__item:hover:not(.used) { border-color: var(--moon-glow); transform: translateY(-3px); }
+.ct__item.picked { border-color: var(--moon-glow); background: rgba(242, 201, 107, .18); transform: translateY(-3px); }
+.ct__item.used { opacity: .2; }
+
+/* 끌고 다니는 그림 */
+.ct__ghost {
+  position: fixed;
+  z-index: 90;
+  width: 84px;
+  transform: translate(-50%, -50%) scale(1.08);
+  pointer-events: none;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .5));
+}
+
+/* 끝나고 보여주는 까닭 */
+.ct__why { display: grid; gap: 6px; margin-top: var(--s3); }
+.ct__whyrow {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 8px var(--s3);
+  border-radius: var(--r-sm);
+  background: rgba(36, 43, 62, .55);
+  border: 1px solid var(--ink-line);
+}
+.ct__whyrow img { width: 42px; flex-shrink: 0; }
+.ct__whyrow b { display: block; color: var(--moon-glow); font-family: var(--font-title); font-size: 15px; }
+.ct__whyrow span { font-size: 13px; color: var(--moon-dim); line-height: 1.5; }
+
+
+/* 교실 서버 없이 열렸을 때 — 혼자 학습이 유일한 길이 된다 */
+.solo-door--only {
+  display: grid;
+  gap: var(--s3);
+  justify-items: center;
+  text-align: center;
+  margin-top: var(--s5);
+  padding: var(--s5);
+  border-radius: var(--r-md);
+  border: 1px solid var(--moon-glow);
+  background: rgba(242, 201, 107, .08);
+}
+.solo-door--only span { font-size: 14px; line-height: 1.7; color: var(--moon-dim); }
+.solo-door--only .btn { font-size: 16px; padding: 12px 26px; }

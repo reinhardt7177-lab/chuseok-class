@@ -1,0 +1,480 @@
+/* ============================================================
+   교사용 전체 학습 — 칠판/TV에 띄우는 화면
+   멀리서도 읽혀야 하므로 글자가 크고, 통제 장치는 가장자리로 뺀다.
+   ============================================================ */
+
+body { overflow: hidden; }
+
+.app {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-areas: "stage" "bar";
+  height: 100dvh;
+}
+
+/* ─────────────── 무대 ─────────────── */
+
+.scene {
+  grid-area: stage;
+  position: relative;
+  overflow: hidden;
+}
+
+.scene__body {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* 위(삽화 고르기)와 아래(본문)를 양끝으로 밀어 서로 겹치지 않게 한다.
+     예전에는 스트립을 absolute로 띄워서, 본문이 길어지면 제목을 덮었다. */
+  justify-content: space-between;
+  padding: var(--s5) clamp(32px, 5vw, 84px) var(--s6);
+  gap: var(--s5);
+}
+
+.scene__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+  flex-shrink: 0;
+}
+
+/* 한 화면에 한 컷. 글이 적으니 크게 키워도 넘치지 않는다. */
+.scene__main {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--s3);
+  min-height: 0;
+  /* ch는 이 요소의 폰트(16px) 기준이라 여기 쓰면 안 된다.
+     예전에 24ch로 뒀더니 207px로 쪼그라들어 글이 세로로 흘렀다.
+     글줄 길이는 .cut__text가 자기 폰트 기준 ch로 알아서 잡는다. */
+  max-width: min(52vw, 980px);
+  flex: 1;
+}
+.scene__main--wide { max-width: min(58vw, 860px); }
+
+.cut__text {
+  font-size: clamp(22px, min(3.2vw, 4.6vh), 52px);
+  line-height: 1.5;
+  color: #fdf7e8;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, .9);
+  margin: 0;
+  max-width: 22ch;
+  animation: line-in .5s var(--ease) both;
+}
+
+.cut__lead {
+  font-family: var(--font-title);
+  font-size: clamp(17px, 1.9vw, 27px);
+  color: var(--moon-glow);
+  margin: 0 0 var(--s2);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .85);
+}
+
+/* 컷 진행 점 */
+.beats {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+  margin-top: var(--s4);
+}
+.beats button {
+  width: 34px;
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(246, 236, 210, .24);
+  transition: background .2s, width .2s var(--ease);
+}
+.beats button:hover { background: rgba(246, 236, 210, .5); }
+.beats button[aria-current="true"] { background: var(--moon-glow); width: 52px; }
+
+.scene__tag {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  opacity: .9;
+}
+
+.scene__no {
+  font-family: var(--font-title);
+  font-size: 13px;
+  letter-spacing: .28em;
+  color: var(--moon-glow);
+}
+
+.scene__title {
+  max-width: none;
+  font-size: clamp(30px, min(4.4vw, 6.4vh), 60px);
+  line-height: 1.12;
+  text-shadow: 0 4px 34px rgba(0, 0, 0, .72);
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+}
+.scene__title .ico { font-size: .82em; }
+
+.scene__headline {
+  max-width: none;
+  font-family: var(--font-title);
+  font-size: clamp(18px, min(2.3vw, 3.2vh), 31px);
+  font-weight: 400;
+  color: var(--moon-glow);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, .8);
+  margin: 0;
+}
+
+@keyframes line-in { to { opacity: 1; transform: none; } }
+
+.scene__keyword {
+  flex-shrink: 0;
+  align-self: flex-start;
+  font-family: var(--font-title);
+  font-size: clamp(15px, 1.5vw, 20px);
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: rgba(16, 19, 28, .62);
+  border: 1px solid rgba(242, 201, 107, .5);
+  color: var(--moon-glow);
+  backdrop-filter: blur(10px);
+}
+
+/* 용어 카드 — 본문 아래 한 줄. 항목이 많아도 자리를 적게 먹어야 한다. */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-top: auto;      /* 본문이 짧으면 아래로 붙는다 */
+  padding-top: var(--s2);
+  flex-shrink: 0;
+}
+.fact {
+  padding: 7px 13px;
+  border-radius: var(--r-sm);
+  background: rgba(16, 19, 28, .72);
+  border: 1px solid var(--ink-line);
+  backdrop-filter: blur(8px);
+  max-width: 290px;
+}
+.fact b { display: block; color: var(--moon-glow); font-family: var(--font-title); font-size: 15px; margin-bottom: 1px; }
+.fact span { font-size: 12.5px; color: var(--moon-dim); line-height: 1.45; }
+
+/* ─────────────── 아래 진행 바 ─────────────── */
+
+.bar {
+  grid-area: bar;
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  padding: var(--s3) var(--s5);
+  background: rgba(10, 12, 18, .95);
+  border-top: 1px solid var(--ink-line);
+  backdrop-filter: blur(16px);
+}
+
+.steps { display: flex; gap: 5px; flex: 1; min-width: 0; }
+.step {
+  flex: 1;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: rgba(246, 236, 210, .07);
+  border: 1px solid transparent;
+  color: var(--moon-dim);
+  font-size: 11.5px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1px;
+  overflow: hidden;
+  transition: background .18s, color .18s, border-color .18s;
+}
+.step em { font-style: normal; font-size: 14px; }
+.step small { font-size: 9.5px; opacity: .7; white-space: nowrap; }
+.step:hover { background: rgba(246, 236, 210, .14); color: var(--moon); }
+.step[aria-current="true"] {
+  background: linear-gradient(135deg, var(--persimmon), #c9582a);
+  color: #fff;
+  border-color: transparent;
+}
+.step.done { color: var(--jade-soft); }
+
+.bar__nav { display: flex; gap: var(--s2); }
+
+.clock {
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  color: var(--moon-dim);
+  min-width: 96px;
+  text-align: right;
+}
+.clock b { color: var(--moon); font-size: 18px; }
+
+/* ============================================================
+   좁은 화면 — 노트북으로 미리 보거나 창을 줄였을 때.
+   교실 프로젝터는 넓지만, 준비할 때는 대개 좁은 화면이다.
+   도크가 무대를 밀어내지 않도록 위에 겹쳐 띄운다.
+   ============================================================ */
+
+
+@media (max-width: 760px) {
+  .bar { flex-wrap: wrap; gap: var(--s2); padding: var(--s2) var(--s3); }
+  .steps { order: 3; width: 100%; flex-basis: 100%; }
+  .step small { display: none; }
+  .step { height: 34px; }
+  .clock { min-width: auto; font-size: 13px; }
+  .scene__keyword { display: none; }
+  .facts { display: none; }   /* 좁으면 본문 읽기가 우선 */
+}
+
+
+/* ============================================================
+   학년 고르기 — 수업의 첫 화면
+   ============================================================ */
+
+.pick {
+  grid-area: stage;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.pick__body { text-align: center; padding: var(--s5); width: min(1080px, 94vw); }
+.pick__lead {
+  font-size: clamp(13px, 1.4vw, 17px);
+  letter-spacing: .3em;
+  color: var(--moon-glow);
+  margin: 0 0 var(--s3);
+}
+.pick__title {
+  font-size: clamp(28px, 4.2vw, 56px);
+  margin-bottom: var(--s7);
+  text-shadow: 0 4px 30px rgba(0,0,0,.7);
+}
+.pick__cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s4); }
+.pick__note { margin-top: var(--s6); font-size: 13px; color: rgba(246,236,210,.45); }
+
+.gradecard {
+  display: grid;
+  gap: 6px;
+  padding: var(--s5) var(--s4);
+  border-radius: var(--r-lg);
+  background: rgba(25, 30, 45, .8);
+  border: 2px solid var(--ink-line);
+  color: var(--moon);
+  text-align: center;
+  backdrop-filter: blur(12px);
+  transition: transform .18s var(--ease), border-color .18s, background .18s;
+}
+.gradecard:hover { transform: translateY(-5px); border-color: var(--moon-glow); background: rgba(34,40,60,.92); }
+.gradecard[aria-pressed="true"] { border-color: var(--moon-glow); background: rgba(242,201,107,.14); }
+.gradecard__emoji { font-size: clamp(32px, 3.4vw, 46px); }
+.gradecard b { font-family: var(--font-title); font-size: clamp(19px, 1.9vw, 26px); }
+.gradecard__sub { font-size: 13.5px; color: var(--moon-dim); line-height: 1.6; }
+.gradecard__meta { font-size: 12px; color: var(--moon-glow); margin-top: 4px; }
+
+/* 수업 중 학년 바꾸기 */
+.sheet {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center;
+  background: rgba(8, 10, 16, .82);
+  backdrop-filter: blur(6px);
+}
+.sheet__box {
+  width: min(900px, 92vw);
+  background: rgba(20, 24, 36, .97);
+  border: 1px solid var(--ink-line);
+  border-radius: var(--r-xl);
+  padding: var(--s6);
+  text-align: center;
+}
+.sheet__box h2 { font-size: 24px; margin-bottom: var(--s5); }
+.sheet__box .btn { margin-top: var(--s5); }
+
+/* ============================================================
+   컷 종류별
+   ============================================================ */
+
+.cut__ask {
+  font-size: clamp(17px, 2.2vw, 31px);
+  line-height: 1.55;
+  color: #fdf7e8;
+  text-shadow: 0 3px 22px rgba(0,0,0,.9);
+  margin: 0 0 var(--s4);
+  padding-left: var(--s4);
+  border-left: 4px solid var(--moon-glow);
+  animation: line-in .5s var(--ease) both;
+}
+.cut__caution {
+  margin-top: var(--s4);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(224,164,88,.16);
+  border: 1px solid rgba(224,164,88,.45);
+  color: #f2d5a4;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+.cut__count { color: var(--moon-dim); font-size: .8em; }
+.cut__wait { color: rgba(246,236,210,.45); font-size: 15px; }
+
+.cut__video {
+  aspect-ratio: 16/9;
+  width: min(58vw, 880px);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--ink-line);
+  box-shadow: var(--shadow-lift);
+}
+.cut__video iframe { width: 100%; height: 100%; border: 0; }
+.cut__videometa { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s3); }
+.cut__videometa b { font-size: 16px; color: var(--moon); }
+.cut__videometa span { font-size: 13px; color: var(--moon-dim); }
+.cut__videometa a { font-size: 13px; color: var(--moon-glow); }
+
+/* 소원·생각 벽 */
+.wallgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+  gap: var(--s2);
+  max-height: 56vh;
+  overflow: hidden;
+}
+.wallcard {
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(242,201,107,.12);
+  border: 1px solid rgba(242,201,107,.3);
+  color: #f8ecd0;
+  font-size: 15px;
+  line-height: 1.5;
+  animation: line-in .4s var(--ease) both;
+}
+.wallcard em { display: block; font-style: normal; font-size: 11.5px; color: var(--moon-glow); margin-top: 5px; }
+
+/* 라이브 퀴즈 */
+.quiz { width: min(76vw, 1080px); }
+.quiz__head { display: flex; align-items: center; gap: var(--s4); margin-bottom: var(--s4); font-size: 14px; color: var(--moon-dim); }
+.quiz__timer { flex: 1; height: 10px; border-radius: 99px; background: rgba(246,236,210,.14); overflow: hidden; }
+.quiz__timer i { display: block; height: 100%; background: linear-gradient(90deg, var(--jade), var(--moon-glow)); transition: width .2s linear; }
+.quiz__count { font-variant-numeric: tabular-nums; color: var(--moon); font-size: 16px; }
+.quiz__q {
+  font-size: clamp(20px, 2.6vw, 38px);
+  line-height: 1.45;
+  margin: 0 0 var(--s5);
+  color: #fdf7e8;
+  text-shadow: 0 3px 22px rgba(0,0,0,.9);
+}
+.quiz__opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+.quiz__opt {
+  position: relative;
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s4) var(--s5);
+  border-radius: var(--r-md);
+  background: var(--c);
+  color: #fff;
+  font-size: clamp(15px, 1.6vw, 23px);
+  overflow: hidden;
+  transition: opacity .3s, transform .2s;
+  text-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
+.quiz__opt.dim { opacity: .3; }
+.quiz__opt.right { outline: 4px solid #fff; transform: scale(1.02); }
+.quiz__mark { font-size: 1.25em; }
+.quiz__label { flex: 1; }
+.quiz__n { font-variant-numeric: tabular-nums; font-weight: 700; z-index: 2; font-size: 1.1em; }
+.quiz__bar { position: absolute; left: 0; bottom: 0; height: 5px; background: rgba(255,255,255,.8); transition: width .5s var(--ease); }
+.quiz__why {
+  margin-top: var(--s4);
+  padding: var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(74,155,120,.16);
+  border: 1px solid rgba(74,155,120,.42);
+  color: #c4e8d4;
+  font-size: clamp(14px, 1.35vw, 18px);
+  line-height: 1.65;
+}
+.quiz__ctrl { margin-top: var(--s5); }
+
+/* 순위 */
+.rank { display: grid; gap: 7px; width: min(560px, 90vw); margin-bottom: var(--s4); }
+.rank__row {
+  display: flex; align-items: center; gap: var(--s4);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: rgba(25,30,45,.85);
+  border: 1px solid var(--ink-line);
+  font-size: 18px;
+  animation: line-in .4s var(--ease) both;
+}
+.rank__row.top { border-color: var(--moon-glow); background: rgba(242,201,107,.14); }
+.rank__no { width: 34px; font-family: var(--font-title); color: var(--moon-glow); font-size: 22px; }
+.rank__name { flex: 1; }
+.rank__score { font-variant-numeric: tabular-nums; color: var(--moon-glow); font-weight: 700; }
+
+/* 접속 안내 */
+.connectcut { display: flex; align-items: center; gap: var(--s7); flex-wrap: wrap; }
+.connectcut__qr {
+  width: clamp(190px, 21vw, 290px); aspect-ratio: 1;
+  padding: 12px; border-radius: var(--r-lg); background: #fff;
+  display: grid; place-items: center;
+}
+.connectcut__qr img { width: 100%; }
+.connectcut__info { flex: 1; min-width: 280px; }
+.connectcut__code {
+  font-family: var(--font-title);
+  font-size: clamp(36px, 4.8vw, 64px);
+  letter-spacing: .14em;
+  color: var(--moon-glow);
+  margin: 0 0 6px;
+}
+.connectcut__url { font-size: 15px; color: var(--moon-dim); margin: 0 0 var(--s5); word-break: break-all; }
+.connectcut__steps { margin: 0; padding-left: 1.1em; display: grid; gap: 7px; }
+.connectcut__steps li { font-size: clamp(14px, 1.35vw, 18px); color: #f2ecdc; line-height: 1.5; }
+.connectcut__steps b { color: var(--moon-glow); }
+
+/* 아래 바 오른쪽 */
+.bar__side { display: flex; align-items: center; gap: var(--s2); }
+.chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(246,236,210,.09);
+  border: 1px solid rgba(246,236,210,.2);
+  color: var(--moon);
+  font-size: 13.5px;
+  white-space: nowrap;
+  transition: background .16s, border-color .16s;
+}
+.chip:hover { background: rgba(246,236,210,.18); border-color: var(--moon-glow); }
+.beats button.is-quiz { background: rgba(228,112,58,.5); }
+
+/* 좁은 화면 */
+@media (max-width: 900px) {
+  .pick__cards { grid-template-columns: 1fr; gap: var(--s2); }
+  .quiz__opts { grid-template-columns: 1fr; }
+  .cut__video { width: 88vw; }
+  .connectcut { gap: var(--s4); justify-content: center; }
+  .clock { display: none; }
+}
+@media (max-width: 760px) {
+  .bar { flex-wrap: wrap; gap: var(--s2); padding: var(--s2) var(--s3); }
+  .steps { order: 3; width: 100%; flex-basis: 100%; }
+  .step small { display: none; }
+  .step { height: 34px; }
+  .scene__keyword { display: none; }
+}
+
+/* 오프닝(명절 벤토)으로 돌아가는 길 — 학년 고르기 화면에만 있다 */
+.pick__back {
+  justify-self: center;
+  margin-top: var(--s5);
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ink-line);
+  color: rgba(246, 236, 210, .55);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color .2s, border-color .2s;
+}
+.pick__back:hover { color: var(--moon-glow); border-color: var(--moon-glow); }

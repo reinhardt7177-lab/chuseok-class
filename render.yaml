@@ -1,0 +1,27 @@
+# Render 배포 설정 — 전 기능(실시간 명단·라이브 퀴즈·입장 코드)이 필요할 때 쓴다.
+#
+# 쓰는 법
+#   1. https://dashboard.render.com  →  New  →  Blueprint
+#   2. 이 저장소를 고르면 아래 설정을 그대로 읽어 간다
+#   3. LEONARDO_API_KEY 는 넣지 않아도 된다.
+#      삽화는 이미 public/assets/ 에 들어 있어서, 수업 중에는 Leonardo를 부르지 않는다.
+#      그림을 새로 만들 때만(scripts/generate-*.js) 필요하다.
+#
+# 주의 — 무료 등급은 15분간 요청이 없으면 잠든다. 다시 깨는 데 30초쯤 걸리므로
+#        수업 시작 몇 분 전에 주소를 한 번 열어 두면 좋다.
+#
+# 교실 수업은 교실 PC에서 `npm start` 로 켜는 쪽이 더 빠르고 안정적이다.
+# 인터넷이 끊겨도 돌아가고, 학생 기기가 같은 와이파이 안에 있으면 지연이 없다.
+
+services:
+  - type: web
+    name: chuseok-class
+    runtime: node
+    plan: free
+    region: singapore          # 한국에서 가장 가깝다
+    buildCommand: npm ci --omit=dev
+    startCommand: node server/server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"

@@ -1,0 +1,42 @@
+# public/ 를 그대로 GitHub Pages에 올린다.
+#
+# 빌드 단계가 없다. 이 앱은 번들러 없이 브라우저가 바로 읽는
+# ES 모듈과 정적 파일로만 되어 있어서, 폴더를 그대로 올리면 끝이다.
+#
+# 여기에 올라간 판에서는 수업 진행과 학생 혼자 학습이 된다.
+# 실시간 명단·라이브 퀴즈·입장 코드는 교실 PC에서 `npm start` 로 서버를 켤 때만 동작한다.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포는 한 번에 하나만. 밀린 것은 최신 것만 남긴다.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

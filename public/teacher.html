@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>추석 계기교육 — 선생님 화면</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2713%27 fill=%27%23f2c96b%27/%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%272.5%27 fill=%27%23d9a53f%27/%3E%3Ccircle cx=%2720%27 cy=%2718%27 r=%273.5%27 fill=%27%23d9a53f%27/%3E%3Ccircle cx=%2713%27 cy=%2721%27 r=%271.8%27 fill=%27%23d9a53f%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/teacher.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ─────────── 학년 고르기 (맨 처음 한 화면) ─────────── -->
+  <section class="pick stage" id="pick" aria-label="학년 고르기">
+    <div class="stage__body pick__body">
+      <p class="pick__lead">추석 계기교육</p>
+      <h1 class="pick__title">어느 학년과 함께할까요?</h1>
+      <div class="pick__cards" id="pickCards"></div>
+      <p class="pick__note">수업 중에도 아래 막대에서 언제든 바꿀 수 있습니다</p>
+      <a class="pick__back" href="index.html">← 우리나라의 명절</a>
+    </div>
+  </section>
+
+  <!-- ─────────── 무대 ─────────── -->
+  <section class="scene stage" id="scene" aria-label="수업 화면" hidden>
+    <div class="stage__body scene__body">
+      <div class="scene__top">
+        <div class="scene__tag">
+          <span class="scene__no" id="sceneNo">장면 1 / 10</span>
+          <span class="pill" id="sceneSub">여는 장면</span>
+          <span class="pill pill--gold" id="sceneMin">3분</span>
+        </div>
+        <div class="scene__keyword" id="keyword"></div>
+      </div>
+
+      <div class="scene__main" id="sceneMain"></div>
+
+      <div class="beats" id="beatDots"></div>
+    </div>
+  </section>
+
+  <!-- ─────────── 아래 진행 바 ─────────── -->
+  <div class="bar" id="bar" hidden>
+    <div class="bar__nav">
+      <button class="btn btn--sm" id="prevBtn" aria-label="이전">◀</button>
+      <button class="btn btn--sm btn--primary" id="nextBtn" aria-label="다음">다음 ▶</button>
+    </div>
+
+    <div class="steps" id="steps"></div>
+
+    <div class="bar__side">
+      <button class="chip" id="bandChip" title="학년 바꾸기">🌱 3~4학년</button>
+      <button class="chip" id="liveChip" title="학생 접속 현황">🙋 0명</button>
+      <span class="clock"><b id="elapsed">0:00</b><br><span id="planned"></span></span>
+    </div>
+  </div>
+</div>
+
+<!-- 학년 바꾸기 (진행 중 잠깐 열리는 창) -->
+<div class="sheet" id="bandSheet" hidden>
+  <div class="sheet__box">
+    <h2>학년 바꾸기</h2>
+    <div class="pick__cards" id="bandCards"></div>
+    <button class="btn btn--sm btn--ghost" id="bandClose">닫기</button>
+  </div>
+</div>
+
+<div class="hint-fs" id="hintFs">
+  <kbd>F11</kbd> 전체화면 · <kbd>←</kbd> <kbd>→</kbd> 한 컷씩 · <kbd>↑</kbd> <kbd>↓</kbd> 장면 통째로
+</div>
+
+<script type="module" src="js/teacher.js"></script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+/* ============================================================
+   추석 계기교육 앱 — 공통 토큰과 연출
+   색은 삽화에서 뽑아왔다: 밤하늘 남색 / 달빛 크림 / 감빛 주홍 / 비취
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap');
+
+:root {
+  /* 밤 */
+  --ink:        #10131c;
+  --ink-2:      #191e2d;
+  --ink-3:      #242b3e;
+  --ink-line:   #333c54;
+
+  /* 달빛 */
+  --moon:       #f6ecd2;
+  --moon-dim:   #cdc3ab;
+  --moon-glow:  #f2c96b;
+
+  /* 감빛 · 비취 */
+  --persimmon:  #e4703a;
+  --persimmon-soft: #f2a273;
+  --jade:       #4a9b78;
+  --jade-soft:  #7fc4a4;
+
+  /* 한지 (밝은 면) */
+  --hanji:      #f8f3e7;
+  --hanji-2:    #efe6d3;
+  --hanji-line: #ddd0b7;
+  --ink-text:   #2b2721;
+
+  /* 의미색 */
+  --ok:         #4a9b78;
+  --no:         #d9534f;
+  --warn:       #e0a458;
+
+  /* 간격 — 4의 배수 */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 22px; --r-xl: 32px;
+
+  --shadow-soft: 0 2px 14px rgba(0, 0, 0, .18);
+  --shadow-lift: 0 10px 40px rgba(0, 0, 0, .34);
+  --glow-moon:   0 0 60px rgba(242, 201, 107, .28);
+
+  --font-title: 'Gowun Batang', 'Nanum Myeongjo', serif;
+  --font-body:  'Gowun Dodum', 'Malgun Gothic', system-ui, sans-serif;
+
+  --ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* display를 직접 지정한 요소에는 [hidden]의 기본 스타일이 먹지 않는다.
+   .enter { display: grid } 때문에 입장 화면이 안 사라지던 문제. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: var(--font-body);
+  background: var(--ink);
+  color: var(--moon);
+  -webkit-font-smoothing: antialiased;
+  text-size-adjust: 100%;
+
+  /* 한국어는 어절 단위로 끊어야 읽힌다.
+     이걸 안 하면 "추석입니 / 다." 처럼 낱말이 두 줄로 쪼개진다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-title);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+}
+
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+
+/* 포커스는 반드시 보이게 — 키보드로도 수업이 돌아가야 한다 */
+:focus-visible {
+  outline: 3px solid var(--moon-glow);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection { background: var(--persimmon); color: #fff; }
+
+/* ============================================================
+   무대 — 삽화 한 장을 배경으로 깔고 그 위에 글을 얹는다
+   ============================================================ */
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  isolation: isolate;
+}
+
+.stage__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  will-change: transform;
+}
+
+/* 글을 얹을 자리를 어둡게 — 읽히지 않으면 수업이 안 된다 */
+.stage__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to top,    rgba(16, 19, 28, .94) 0%, rgba(16, 19, 28, .55) 38%, rgba(16, 19, 28, .12) 70%),
+    linear-gradient(to right,  rgba(16, 19, 28, .80) 0%, rgba(16, 19, 28, .25) 45%, transparent 75%);
+}
+
+.stage__scrim--soft {
+  background: linear-gradient(to top, rgba(16, 19, 28, .88) 0%, rgba(16, 19, 28, .30) 55%, transparent 100%);
+}
+
+.stage__body { position: relative; z-index: 3; }
+
+/* ============================================================
+   모션 — 정지 이미지에 생명을 넣는 부분
+   삽화가 멈춰 있으면 화면이 죽는다. 느리게, 은근하게.
+   ============================================================ */
+
+@keyframes kenburns-in  { from { transform: scale(1)    translate3d(0,0,0); } to { transform: scale(1.14) translate3d(-1.5%, -1%, 0); } }
+@keyframes kenburns-out { from { transform: scale(1.14) translate3d(1.5%, 1%, 0); } to { transform: scale(1) translate3d(0,0,0); } }
+@keyframes pan-left     { from { transform: scale(1.12) translate3d(3%, 0, 0); }  to { transform: scale(1.12) translate3d(-3%, 0, 0); } }
+@keyframes pan-right    { from { transform: scale(1.12) translate3d(-3%, 0, 0); } to { transform: scale(1.12) translate3d(3%, 0, 0); } }
+@keyframes sway         { 0%,100% { transform: scale(1.09) translate3d(-1.2%, 0, 0) rotate(-.25deg); } 50% { transform: scale(1.09) translate3d(1.2%, -.6%, 0) rotate(.25deg); } }
+@keyframes floaty       { 0%,100% { transform: scale(1.06) translate3d(0, 1%, 0); } 50% { transform: scale(1.06) translate3d(0, -1.4%, 0); } }
+
+.motion-kenburns-in  { animation: kenburns-in  28s var(--ease) forwards; }
+.motion-kenburns-out { animation: kenburns-out 28s var(--ease) forwards; }
+.motion-pan-left     { animation: pan-left     34s ease-in-out infinite alternate; }
+.motion-pan-right    { animation: pan-right    34s ease-in-out infinite alternate; }
+.motion-sway         { animation: sway         16s ease-in-out infinite; }
+.motion-float        { animation: floaty       14s ease-in-out infinite; }
+.motion-still        { transform: scale(1.02); }
+
+/* ============================================================
+   파티클 레이어 — 달빛, 반딧불, 김, 낙엽
+   canvas 없이 CSS만으로. 교실 저사양 PC에서도 돌아가야 한다.
+   ============================================================ */
+
+.fx {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.fx span {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* 달빛 — 크고 느리게 내려앉는 빛 */
+@keyframes drift-down {
+  0%   { transform: translate3d(0, -12vh, 0) scale(.6); opacity: 0; }
+  12%  { opacity: var(--peak, .5); }
+  88%  { opacity: var(--peak, .5); }
+  100% { transform: translate3d(var(--dx, 3vw), 112vh, 0) scale(1); opacity: 0; }
+}
+
+/* 반딧불 — 떠다니며 깜빡 */
+@keyframes wander {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  20%  { opacity: var(--peak, .85); }
+  50%  { transform: translate3d(var(--dx, 4vw), calc(var(--dy, 6vh) * -1), 0); opacity: .25; }
+  80%  { opacity: var(--peak, .85); }
+  100% { transform: translate3d(calc(var(--dx, 4vw) * -.6), calc(var(--dy, 6vh) * -2), 0); opacity: 0; }
+}
+
+/* 김 — 위로 번지며 흩어짐 */
+@keyframes rise-fade {
+  0%   { transform: translate3d(0, 0, 0) scale(.8); opacity: 0; }
+  25%  { opacity: var(--peak, .3); }
+  100% { transform: translate3d(var(--dx, 2vw), -40vh, 0) scale(2.4); opacity: 0; }
+}
+
+/* 낙엽 — 흔들리며 떨어짐 */
+@keyframes tumble {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: .8; }
+  90%  { opacity: .8; }
+  100% { transform: translate3d(var(--dx, 8vw), 110vh, 0) rotate(540deg); opacity: 0; }
+}
+
+.fx--moonlight span {
+  background: radial-gradient(circle, rgba(246, 236, 210, .9) 0%, rgba(246, 236, 210, 0) 70%);
+  animation: drift-down var(--dur, 22s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.fx--fireflies span {
+  background: radial-gradient(circle, rgba(242, 201, 107, 1) 0%, rgba(242, 201, 107, 0) 65%);
+  box-shadow: 0 0 10px rgba(242, 201, 107, .7);
+  animation: wander var(--dur, 12s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.fx--sparks span {
+  background: radial-gradient(circle, rgba(255, 233, 180, 1) 0%, rgba(228, 112, 58, 0) 70%);
+  animation: wander var(--dur, 9s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.fx--steam span {
+  background: radial-gradient(circle, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 70%);
+  animation: rise-fade var(--dur, 9s) ease-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.fx--dust span {
+  background: radial-gradient(circle, rgba(246, 236, 210, .7) 0%, rgba(246, 236, 210, 0) 70%);
+  animation: drift-down var(--dur, 30s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.fx--leaves span {
+  border-radius: 46% 8% 46% 8%;
+  background: linear-gradient(140deg, var(--persimmon), #b8532a);
+  animation: tumble var(--dur, 15s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* 움직임을 싫어하는 사람도 있고, 저사양 기기도 있다 */
+@media (prefers-reduced-motion: reduce) {
+  .stage__img { animation: none !important; transform: scale(1.02) !important; }
+  .fx { display: none; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ============================================================
+   공통 부품
+   ============================================================ */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  background: rgba(246, 236, 210, .12);
+  border: 1px solid rgba(246, 236, 210, .22);
+  color: var(--moon);
+  backdrop-filter: blur(6px);
+}
+
+.pill--gold   { background: rgba(242, 201, 107, .18); border-color: rgba(242, 201, 107, .45); color: #ffdf9e; }
+.pill--jade   { background: rgba(74, 155, 120, .20);  border-color: rgba(74, 155, 120, .5);   color: #a8e0c4; }
+.pill--persim { background: rgba(228, 112, 58, .20);  border-color: rgba(228, 112, 58, .5);   color: #ffb98e; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  padding: 12px 22px;
+  border-radius: var(--r-md);
+  font-size: 16px;
+  font-weight: 700;
+  background: rgba(246, 236, 210, .1);
+  border: 1px solid rgba(246, 236, 210, .26);
+  color: var(--moon);
+  transition: transform .14s var(--ease), background .18s, border-color .18s;
+}
+.btn:hover:not(:disabled) { background: rgba(246, 236, 210, .18); transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--persimmon), #c9582a);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(228, 112, 58, .35);
+}
+.btn--primary:hover:not(:disabled) { filter: brightness(1.1); }
+
+.btn--gold {
+  background: linear-gradient(135deg, var(--moon-glow), #d9a53f);
+  border-color: transparent;
+  color: #3a2a08;
+  box-shadow: 0 4px 18px rgba(242, 201, 107, .32);
+}
+
+.btn--ghost { background: transparent; }
+
+.btn--lg { padding: 16px 34px; font-size: 19px; border-radius: var(--r-lg); }
+.btn--sm { padding: 8px 14px; font-size: 14px; border-radius: var(--r-sm); }
+
+.card {
+  background: rgba(25, 30, 45, .82);
+  border: 1px solid var(--ink-line);
+  border-radius: var(--r-lg);
+  padding: var(--s5);
+  backdrop-filter: blur(10px);
+}
+
+.card--hanji {
+  background: var(--hanji);
+  border-color: var(--hanji-line);
+  color: var(--ink-text);
+}
+
+/* 스크롤바 */
+* { scrollbar-width: thin; scrollbar-color: var(--ink-line) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--ink-line); border-radius: 99px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
