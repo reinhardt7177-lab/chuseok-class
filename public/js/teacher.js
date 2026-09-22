@@ -225,9 +225,9 @@ function paintCut(cut) {
       host.innerHTML = `
         <p class="cut__lead">🙋 이제 각자 해봅시다</p>
         <div class="connectcut">
-          <div class="connectcut__qr">${connect
+          <div class="connectcut__qr">${connect?.qr
             ? `<img src="${connect.qr}" alt="학생 접속 QR 코드">`
-            : '<span>주소를 부르는 중…</span>'}</div>
+            : `<span>${connect ? '위 주소를 직접 열어 주세요' : '주소를 부르는 중…'}</span>`}</div>
           <div class="connectcut__info">
             ${connect?.standalone
               ? '<p class="connectcut__code connectcut__code--url">혼자 해보기</p>'

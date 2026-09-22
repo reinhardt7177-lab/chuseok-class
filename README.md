@@ -205,6 +205,15 @@ node scripts/check-videos.js
 
 ---
 
+## 가져다 쓴 것
+
+- 글꼴 — [고운바탕 · 고운돋움](https://fonts.google.com/?query=gowun) (Google Fonts, OFL)
+- QR 그리기 — [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4 (MIT).
+  교실에서 인터넷이 끊겨도 되게 `public/js/vendor/` 에 같이 넣어 두었습니다.
+- 삽화 — Leonardo.Ai로 직접 생성했습니다. 영상은 각 채널의 YouTube 링크를 걸어 둘 뿐 내려받지 않습니다.
+
+---
+
 ## 구조
 
 ```

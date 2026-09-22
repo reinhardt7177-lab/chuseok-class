@@ -22,28 +22,35 @@ export function hasServer() {
  * QR을 만든다.
  *
  * 교실 서버가 있을 때는 서버가 만들어 준 것을 쓰므로 이 길로 오지 않는다.
- * 정적 호스팅일 때만 쓰이는데, 그때는 어차피 인터넷에 연결돼 있으므로
- * 필요한 순간에만 CDN에서 받아 온다. 교실에서는 아무것도 받지 않는다.
+ * 정적 호스팅일 때만 쓰인다.
  *
- * @returns {Promise<string|null>} data:image/png URL — 실패하면 null
+ * 그리는 라이브러리는 js/vendor/ 에 같이 넣어 두었다. CDN에서 받아 오게 했더니
+ * 주소가 바뀌어 QR 자리가 깨진 그림으로 남은 적이 있고, 무엇보다 교실에서
+ * 인터넷이 끊기면 못 받는다.
+ *
+ * @returns {Promise<string|null>} data URL — 실패하면 null
  */
 export async function qrDataUrl(text) {
   try {
-    if (!window.QRCode) {
+    if (!window.qrcode) {
       await new Promise((ok, no) => {
         const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js';
+        s.src = new URL('js/vendor/qrcode-generator.js', baseHref()).href;
         s.onload = ok;
         s.onerror = no;
         document.head.append(s);
       });
     }
-    return await window.QRCode.toDataURL(text, {
-      width: 420,
-      margin: 1,
-      color: { dark: '#10131c', light: '#f6ecd2' },
-    });
+    const qr = window.qrcode(0, 'M');    // 0 = 내용에 맞춰 크기 자동
+    qr.addData(text);
+    qr.make();
+    return qr.createDataURL(8, 2);       // 칸 8px, 여백 2칸
   } catch {
-    return null;   // QR이 없어도 주소만으로 들어올 수 있다
+    return null;   // QR이 없어도 주소만 보고 들어올 수 있다
   }
+}
+
+/** teacher.html 이든 student.html 이든 같은 폴더를 가리키게 */
+function baseHref() {
+  return location.href.replace(/[^/]*$/, '');
 }
