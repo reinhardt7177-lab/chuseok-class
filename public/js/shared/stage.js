@@ -62,7 +62,7 @@ export function renderStage(host, assetId, opts = {}) {
   const scrim = opts.scrim ?? 'full';
 
   // 기존 배경·효과만 걷어낸다 (.stage__body 안의 내용은 남긴다)
-  host.querySelectorAll('.stage__img, .fx, .stage__scrim').forEach((n) => n.remove());
+  host.querySelectorAll('.stage__backdrop, .stage__img, .fx, .stage__scrim').forEach((n) => n.remove());
 
   const img = document.createElement('img');
   img.className = `stage__img motion-${motion}`;
@@ -75,6 +75,15 @@ export function renderStage(host, assetId, opts = {}) {
   img.addEventListener('load', () => { void img.offsetWidth; }, { once: true });
 
   host.prepend(img);
+
+  // 교사용 수업 화면은 삽화의 가장자리까지 보여준다. 넓은 화면의 여백은
+  // 같은 삽화를 흐리게 깔아 메워 원본이 잘리지 않도록 한다.
+  if (host.classList.contains('scene')) {
+    const backdrop = img.cloneNode();
+    backdrop.className = 'stage__backdrop';
+    backdrop.setAttribute('aria-hidden', 'true');
+    img.before(backdrop);
+  }
 
   if (scrim !== 'none') {
     const s = document.createElement('div');
