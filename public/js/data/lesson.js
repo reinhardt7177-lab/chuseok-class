@@ -426,71 +426,80 @@ export const SECTIONS = [
     activity: 'ganggangsullae',
     content: {
       low: {
-        headline: '손잡고 빙글빙글 돌아요',
+        headline: '함께 춤추고 힘을 겨루는 놀이',
         lines: [
-          '달이 밝은 밤이에요.',
-          '손을 잡고 둥글게 서요.',
-          '빙글빙글 돌면서 노래해요.',
-          '강강술래! 하고 함께 외쳐요.',
-          '씨름도 하고 줄다리기도 해요.',
-          '다 같이 하니까 더 재미있어요.',
+          '밝은 달 아래에서 강강술래를 했어요.',
+          '손을 잡고 둥글게 돌며 노래해요.',
+          '씨름은 두 사람이 샅바를 잡고 겨뤄요.',
+          '상대방을 넘어뜨리면 이겨요.',
+          '줄다리기는 두 편이 긴 줄을 잡아요.',
+          '모두 힘을 모아 줄을 당겨요.',
+          '지역마다 놀이가 달랐지만 함께 어울렸어요.',
         ],
+        lineArt: ['ganggangsullae', 'ganggangsullae-above', 'ssireum', 'ssireum', 'tug-of-war', 'tug-of-war', 'folk-games'],
+        factsArt: 'folk-games',
+        videoArt: 'folk-games',
+        askArt: 'folk-games',
         items: [
-          { name: '강강술래', emoji: '💃', gloss: '손잡고 둥글게 도는 놀이' },
-          { name: '씨름', emoji: '🤼', gloss: '힘겨루기 놀이' },
-          { name: '줄다리기', emoji: '🪢', gloss: '줄을 당기는 놀이' },
+          { name: '강강술래', emoji: '💃', gloss: '손잡고 둥글게 돌며 노래하고 춤추기' },
+          { name: '씨름', emoji: '🤼', gloss: '샅바를 잡고 상대를 넘어뜨리기' },
+          { name: '줄다리기', emoji: '🪢', gloss: '두 편이 힘을 모아 긴 줄 당기기' },
         ],
-        keyword: '강강술래',
+        keyword: '강강술래 · 씨름 · 줄다리기',
       },
       mid: {
-        headline: '보름달 아래 둥글게, 강강술래',
+        headline: '강강술래·씨름·줄다리기',
         lines: [
           '강강술래는 손을 잡고 둥글게 돌며 부르는 노래이자 춤입니다.',
-          '한 사람이 먼저 앞소리를 부릅니다.',
-          '그러면 나머지가 강강술래 하고 받지요.',
-          '이것을 메기고 받는 소리라고 합니다.',
-          '처음에는 아주 느리게 시작해요.',
-          '그러다 점점 빨라집니다. 진양조에서 중모리, 자진모리로요.',
-          '둥근 모양은 보름달을 닮았습니다. 풍요를 비는 마음이 담겼지요.',
-          '2009년 유네스코 인류무형문화유산으로 등재되었습니다.',
+          '한 사람이 앞소리를 메기면 여럿이 “강강술래” 하고 받아요.',
+          '느리게 시작해 점점 빠르게 도는 모습이 보름달을 떠올리게 하지요.',
+          '씨름은 두 사람이 샅바를 잡고 상대를 넘어뜨리려 겨루는 놀이입니다.',
+          '추석 같은 명절에 씨름판이 열리면 선수와 구경꾼이 함께 즐겼어요.',
+          '줄다리기는 두 편이 긴 줄을 잡고 힘을 모아 당기는 놀이입니다.',
+          '지역에 따라 풍년과 마을의 안녕을 바라는 뜻도 담았지요.',
+          '놀이 모습은 지역마다 달랐지만, 함께 어울리는 즐거움이 있었습니다.',
         ],
+        lineArt: ['ganggangsullae', 'ganggangsullae-above', 'ganggangsullae-above', 'ssireum', 'ssireum', 'tug-of-war', 'tug-of-war', 'folk-games'],
+        factsArt: 'folk-games',
+        videoArt: 'ganggangsullae',
+        askArt: 'folk-games',
         items: [
           { name: '강강술래', emoji: '💃', gloss: '손잡고 원을 그리며 부르는 노래이자 춤' },
           { name: '씨름', emoji: '🤼', gloss: '샅바를 잡고 겨루는 힘겨루기' },
-          { name: '줄다리기', emoji: '🪢', gloss: '마을이 편을 갈라 당기는 놀이' },
-          { name: '소싸움', emoji: '🐂', gloss: '남부 지방에서 벌이던 소 겨루기' },
+          { name: '줄다리기', emoji: '🪢', gloss: '두 편이 함께 긴 줄을 당기는 놀이' },
         ],
-        keyword: '강강술래 · 메기고 받기',
+        keyword: '강강술래 · 씨름 · 줄다리기',
       },
       high: {
-        headline: '놀이에 담긴 공동체의 방식',
+        headline: '세 놀이로 보는 추석의 어울림',
         lines: [
-          '강강술래는 전남 해안 지역에서 전해 온 여성들의 집단 놀이입니다.',
-          '한 사람이 앞소리를 메기면 여럿이 뒷소리를 받는 선후창 구조이지요.',
-          '진양조에서 시작해 중모리, 자진모리로 장단이 빨라지며 흥이 고조됩니다.',
-          '중간에 남생아 놀아라, 청어 엮기, 문지기 같은 놀이가 끼어들기도 합니다.',
-          '임진왜란 때 이순신 장군이 시켰다는 이야기도 전하지만,',
-          '학자들은 그보다 훨씬 오래된 풍요 기원 의례에서 비롯됐다고 봅니다.',
-          '줄다리기도 단순한 힘겨루기가 아니었습니다.',
-          '마을을 두 편으로 갈라 겨루되, 이긴 편에 풍년이 든다고 믿었지요.',
-          '그리고 진 편도 함께 잔치를 벌였습니다.',
-          '가배와 줄다리기에는 겨룬 뒤 함께 어울리는 모습도 나타납니다.',
+          '강강술래는 전남 해안 지역에서 전해 온 공동체의 노래와 춤입니다.',
+          '앞소리와 뒷소리를 주고받으며 원을 그려 돌다가 점점 빠르게 움직입니다.',
+          '씨름에서는 두 선수가 샅바를 잡고 기술을 써서 상대를 넘어뜨립니다.',
+          '명절의 씨름판은 선수와 구경꾼이 함께 즐기는 자리이기도 했습니다.',
+          '줄다리기는 마을 사람들이 편을 나누어 긴 줄을 함께 당기는 놀이입니다.',
+          '일부 지역에서는 줄다리기를 하며 풍년과 공동체의 안녕을 빌었습니다.',
+          '강강술래는 2009년, 남북이 함께 등재한 씨름은 2018년 유네스코 인류무형문화유산이 됐습니다.',
+          '줄다리기 의례와 놀이는 한국을 포함한 네 나라가 함께 올려 2015년 등재됐지요.',
+          '방법은 서로 다르지만, 여러 사람이 함께 어울린다는 공통점이 있습니다.',
         ],
+        lineArt: ['ganggangsullae', 'ganggangsullae-above', 'ssireum', 'ssireum', 'tug-of-war', 'tug-of-war', 'folk-games', 'tug-of-war', 'folk-games'],
+        factsArt: 'folk-games',
+        videoArt: 'ganggangsullae',
+        askArt: 'folk-games',
         items: [
           { name: '강강술래', emoji: '💃', gloss: '선후창 · 유네스코 인류무형문화유산(2009)' },
           { name: '씨름', emoji: '🤼', gloss: '유네스코 인류무형문화유산(2018, 남북 공동)' },
           { name: '줄다리기', emoji: '🪢', gloss: '유네스코 인류무형문화유산(2015, 4개국 공동)' },
-          { name: '소싸움', emoji: '🐂', gloss: '영남 지역의 추수기 겨루기' },
-          { name: '거북놀이', emoji: '🐢', gloss: '수숫잎 거북을 앞세워 집집을 도는 놀이' },
         ],
-        keyword: '선후창 · 무형문화유산 · 공동체',
+        keyword: '강강술래 · 씨름 · 줄다리기',
       },
     },
     prompts: {
-      low: ['다 같이 하는 놀이 중에 뭐가 제일 재미있나요?', '손잡고 도는 놀이를 해본 적 있나요?'],
-      mid: ['왜 둥글게 돌았을까요?', '점점 빨라지면 어떤 기분이 들까요?'],
+      low: ['세 놀이 중에 무엇을 해보고 싶나요?', '혼자 할 때와 함께할 때 무엇이 다를까요?'],
+      mid: ['강강술래·씨름·줄다리기는 각각 어떻게 하나요?', '이 놀이들에는 어떤 공통점이 있을까요?'],
       high: [
-        '승패를 가린 뒤 다시 함께 어울리는 구조인 이유는 무엇일까요?',
+        '세 놀이에서 경쟁과 협력은 각각 어떻게 나타나나요?',
         '요즘 우리 반에서 모두가 함께할 수 있는 놀이는 무엇이 있을까요?',
       ],
     },
@@ -726,10 +735,20 @@ export function beatsFor(section, band, art = [], extras = {}) {
   const chosen = new Array(body.lines.length).fill(null);
   const used = new Set();
 
+  /* 그림의 순서가 문장 뜻과 달라질 수 있는 장면은 짝을 명시한다.
+     같은 그림을 여러 문장에 써도 씨름 설명에 강강술래가 나오지 않는다. */
+  body.lineArt?.forEach((id, i) => {
+    const match = art.find((a) => a.id === id);
+    if (match && i < chosen.length) {
+      chosen[i] = match;
+      used.add(match.id);
+    }
+  });
+
   /* 도입 문장("달이 밝은 밤이에요" 같은)에는 특정 낱말이 없어 엉뚱한 그림이 붙는다.
      첫 컷은 그 장면의 대표 삽화로 못박는다. */
   const hero = art.find((a) => a.role === 'hero');
-  if (hero) {
+  if (hero && !chosen[0]) {
     chosen[0] = hero;
     used.add(hero.id);
   }
@@ -760,19 +779,19 @@ export function beatsFor(section, band, art = [], extras = {}) {
   /* 용어는 따로 한 화면 — 문장에 섞으면 둘 다 안 읽힌다 */
   const facts = body.facts ?? body.items ?? [];
   if (facts.length) {
-    beats.push({ kind: 'facts', facts, art: leftover(), showTitle: false });
+    beats.push({ kind: 'facts', facts, art: art.find((a) => a.id === body.factsArt) ?? leftover(), showTitle: false });
   }
 
   /* 영상은 흐름 안에 한 컷으로 들어간다.
      예전에는 오른쪽 도구창에 있어서 교사가 따로 찾아 눌러야 했다. */
   if (extras.video) {
-    beats.push({ kind: 'video', video: extras.video, art: leftover(), showTitle: false });
+    beats.push({ kind: 'video', video: extras.video, art: art.find((a) => a.id === body.videoArt) ?? leftover(), showTitle: false });
   }
 
   /* 교사 발문도 화면에 띄운다. 학생이 함께 읽고 생각할 시간이 된다. */
   const ask = section.prompts[band] ?? [];
   if (ask.length) {
-    beats.push({ kind: 'ask', ask, art: leftover(), showTitle: false });
+    beats.push({ kind: 'ask', ask, art: art.find((a) => a.id === body.askArt) ?? leftover(), showTitle: false });
   }
 
   return beats;
