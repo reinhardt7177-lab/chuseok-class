@@ -335,3 +335,21 @@ img { max-width: 100%; display: block; }
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
+
+/* ─────────────── 배경음악 단추 ───────────────
+   선생님 화면과 오프닝에만 있다. 학생 화면에는 일부러 없다. */
+.bgm {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(246, 236, 210, .09);
+  border: 1px solid rgba(246, 236, 210, .2);
+  color: var(--moon-dim);
+  font: inherit;
+  font-size: 13.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, color .16s;
+}
+.bgm:hover { background: rgba(246, 236, 210, .18); border-color: var(--moon-glow); }
+.bgm[aria-pressed="true"] { color: var(--moon-glow); border-color: rgba(242, 201, 107, .55); }
+.pick__body .bgm { justify-self: center; margin-top: var(--s3); }

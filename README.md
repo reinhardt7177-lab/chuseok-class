@@ -252,6 +252,9 @@ node scripts/check-videos.js
 - 글꼴 — [고운바탕 · 고운돋움](https://fonts.google.com/?query=gowun) (Google Fonts, OFL)
 - QR 그리기 — [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4 (MIT).
   교실에서 인터넷이 끊겨도 되게 `public/js/vendor/` 에 같이 넣어 두었습니다.
+- 배경음악 — 「보름달이 뜨는 날」(`public/assets/audio/bgm.mp3`). 선생님 화면과 오프닝에서만 흐르고,
+  학생 기기에서는 나오지 않습니다. 영상 컷에서는 저절로 쉬고, ♪ 단추로 끄면 다음 수업에도 꺼진 채로 기억합니다.
+  선생님이 직접 넣은 음원이라 코드의 MIT 허가와는 별개입니다.
 - 삽화 — Leonardo.Ai로 직접 생성했습니다. 영상은 각 채널의 YouTube 링크를 걸어 둘 뿐 내려받지 않습니다.
 
 ---

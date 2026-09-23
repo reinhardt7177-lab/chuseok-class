@@ -8,6 +8,7 @@
 
 import { HOLIDAYS, HERO } from './data/holidays.js';
 import { renderStage, preload } from './shared/stage.js';
+import { mountBgm } from './shared/bgm.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -86,6 +87,9 @@ renderStage(document.getElementById('stage'), 'landing-hero', {
   motion: 'kenburns-in',
   layers: ['moonlight', 'fireflies'],
 });
+
+/* 배경음악 — 칸을 처음 누르는 순간부터. 추석을 눌러 넘어가면 선생님 화면이 이어서 튼다. */
+mountBgm(document.querySelector('.open__foot'), { before: document.querySelector('.open__student') });
 
 /* 다음에 바로 쓸 삽화를 미리 받아둔다 */
 preload(['opening-moonrise', 'opening-village-far', 'student-welcome']);

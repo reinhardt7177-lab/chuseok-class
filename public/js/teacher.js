@@ -13,6 +13,7 @@ import { quizFor, titleFor } from './data/quiz.js';
 import { assetsFor } from './shared/assets.js';
 import { renderStage, preload } from './shared/stage.js';
 import { hasServer, qrDataUrl } from './shared/offline.js';
+import { mountBgm, holdBgm } from './shared/bgm.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
@@ -85,6 +86,9 @@ function paint() {
   const list = currentBeats();
   state.beat = Math.max(0, Math.min(list.length - 1, state.beat));
   const cut = list[state.beat];
+
+  /* 영상이 나올 땐 음악을 쉰다. 유튜브 소리 위에 겹치면 둘 다 안 들린다. */
+  holdBgm(cut?.kind === 'video');
 
   /* 대기실·문제·시상식을 모두 벗어나면 라이브를 닫는다.
      안 닫으면 학생 기기가 퀴즈 화면에 갇혀서 다음으로 못 넘어간다. */
@@ -667,6 +671,11 @@ document.addEventListener('keydown', (e) => {
 
 renderStage($('pick'), 'landing-hero', { motion: 'kenburns-in', layers: ['moonlight', 'fireflies'] });
 paintPick();
+
+/* 배경음악 — 학년 고르기 화면과 아래 막대에 단추 하나씩. 소리는 하나다.
+   학년을 고르는 첫 클릭에 맞춰 시작한다(브라우저 자동재생 정책). */
+mountBgm($('pick').querySelector('.pick__body'));
+mountBgm(document.querySelector('.bar__side'), { before: document.querySelector('.bar__side .clock') });
 /* 방을 먼저 열어야 코드·QR·명단이 내 반 것으로 나온다 */
 ensureRoom().then(() => {
   listen();

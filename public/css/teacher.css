@@ -8,6 +8,10 @@ body { overflow: hidden; }
 .app {
   display: grid;
   grid-template-rows: 1fr auto;
+  /* 세로 한 칸을 minmax(0, 1fr)로 못박는다. auto로 두면 아래 막대의 최소 너비
+     (단계 이름 열 개를 안 접었을 때의 폭)만큼 칸이 늘어나 화면 전체가 옆으로 삐져나간다.
+     자식에 min-width:0 을 줘도 이 "최소 너비 기여"는 줄지 않는다. */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas: "stage" "bar";
   height: 100dvh;
 }
@@ -170,6 +174,7 @@ body { overflow: hidden; }
 
 .bar {
   grid-area: bar;
+  min-width: 0;                 /* 위와 같은 이유 — 막대가 칸을 벌리지 못하게 */
   display: flex;
   align-items: center;
   gap: var(--s4);
