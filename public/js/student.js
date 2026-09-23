@@ -25,6 +25,11 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
 
 const SAVE_KEY = 'chuseok.student';
 
+/* 연결은 하나만 — 입장을 거듭해도 늘어나지 않게 여기서 들고 있는다 */
+let es = null;
+let pollTimer = null;
+let joining = false;
+
 const me = {
   id: null,
   name: null,
@@ -98,6 +103,11 @@ function setupEnter() {
 
   $('joinForm').onsubmit = async (e) => {
     e.preventDefault();
+    /* 이미 들어와 있으면 또 들어가지 않는다.
+       두 번 들어가면 아이디가 바뀌고 연결이 하나 더 생긴다. 몇 번 쌓이면
+       브라우저 연결 한도(6개)가 차서 그 뒤 모든 요청이 영원히 기다린다. */
+    if (!$('main').hidden || joining) return;
+    joining = true;
     const btn = $('joinBtn');
     btn.disabled = true;
     btn.textContent = '들어가는 중…';
@@ -122,11 +132,12 @@ function setupEnter() {
 
       apply(data.view);
       listen();
-      setInterval(poll, 6000);
+      pollTimer ??= setInterval(poll, 6000);     // 한 번만 건다
     } catch (err) {
       $('err').textContent = err.message;
       $('err').hidden = false;
     } finally {
+      joining = false;
       btn.disabled = false;
       btn.textContent = '들어가기';
     }
@@ -147,8 +158,9 @@ async function poll() {
 }
 
 function listen() {
-  /* 내가 들어간 방의 소식만 받는다 */
-  const es = new EventSource(`/api/events?studentId=${encodeURIComponent(me.id)}`);
+  /* 내가 들어간 방의 소식만 받는다. 전 연결은 반드시 닫는다 — 안 닫으면 쌓인다. */
+  es?.close();
+  es = new EventSource(`/api/events?studentId=${encodeURIComponent(me.id)}`);
   es.addEventListener('update', () => poll());
   es.onopen = () => setConn(true);
   es.onerror = () => setConn(false);
@@ -345,6 +357,7 @@ const MENU = [
   { id: 'moon-wish', icon: '🌙', label: '소원 적기' },
   { id: 'discuss', icon: '💭', label: '오늘의 추석' },
   { id: 'reflect', icon: '✍️', label: '배움 정리' },
+  { id: 'postcard', icon: '💌', label: '추석 엽서 쓰기' },
 ];
 
 function renderMenu(view) {

@@ -137,6 +137,9 @@ function paintCut(cut) {
   host.className = 'scene__main';
   const wide = () => host.classList.add('scene__main--wide');
 
+/* 달 하늘·대기실·시상식은 무대를 통째로 쓴다 — 폭을 제한하면 줄이 쌓여 잘린다 */
+  const full = () => host.classList.add('scene__main--full');
+
   switch (cut.kind) {
     case 'line': {
       const s = resolveSection(section(), state.band);
@@ -186,7 +189,7 @@ function paintCut(cut) {
       break;
 
     case 'wall': {
-      wide();
+      full();
       const w = snap?.wishes ?? [];
       /* 소원 하나에 달 하나. 너무 많으면 글씨가 작아져 못 읽으므로 최근 것부터 띄운다. */
       const moons = [...w].reverse().slice(0, MOON_MAX);
@@ -235,7 +238,7 @@ function paintCut(cut) {
       break;
 
     case 'lobby': {
-      wide();
+      full();
       const here = (snap?.students ?? []).filter((x) => x.online);
       host.innerHTML = `
         <p class="cut__lead">🙋 다 모였나요? <span class="cut__count">${here.length}명</span></p>
@@ -260,8 +263,10 @@ function paintCut(cut) {
           </div>
         </div>`;
 
-      /* 대기실에서 바로 첫 문제로 — 넘기고 또 여는 두 번 수고를 없앤다 */
-      host.querySelector('#quizGo').onclick = () => {
+      /* 대기실에서 바로 첫 문제로 — 넘기고 또 여는 두 번 수고를 없앤다.
+         점수를 비우는 것은 여기, 시작을 누르는 순간뿐이다. */
+      host.querySelector('#quizGo').onclick = async () => {
+        await live('reset');
         step(1);
         const first = currentBeats()[state.beat];
         if (first?.kind !== 'quiz') return;
@@ -272,7 +277,7 @@ function paintCut(cut) {
     }
 
     case 'rank': {
-      wide();
+      full();
       const board = snap?.leaderboard ?? [];
       const podium = board.slice(0, 3);
       const rest = board.slice(3);

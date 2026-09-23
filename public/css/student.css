@@ -949,7 +949,7 @@ body { min-height: 100dvh; }
   position: relative;
   width: min(340px, 86vw);
   aspect-ratio: 1;
-  margin: 0 auto var(--s4);
+  margin: 0 auto calc(var(--s4) + 11%);   /* 아래 무용수 치맛자락만큼 */
   display: grid;
   place-items: center;
 }
@@ -1101,3 +1101,119 @@ body { min-height: 100dvh; }
   border-top: 1px solid var(--ink-line);
 }
 .solo-door span { font-size: 13px; color: var(--moon-dim); }
+
+/* 다음 박에 맞춰 오므라드는 원.
+   달이 번쩍인 뒤에 누르면 이미 늦다. 미리 겨냥할 것을 눈에 보여줘야 한다. */
+.gg__timing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46%;
+  aspect-ratio: 1;
+  margin: -23% 0 0 -23%;
+  border-radius: 50%;
+  /* 어두운 하늘 위에서도 한눈에 보이게 — 굵고 밝고 빛난다 */
+  border: 5px solid #ffe9a8;
+  box-shadow: 0 0 22px rgba(242, 201, 107, .9), inset 0 0 14px rgba(242, 201, 107, .45);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+}
+@keyframes gg-aim {
+  from { transform: scale(2.4); opacity: .55; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+/* 셈여림 숫자는 크게 */
+.gg__moon.count { font-size: 34px; }
+
+/* 진짜 노래는 국립국악원 영상으로 — 음원은 저작권 때문에 넣지 않는다 */
+.gg__song {
+  display: block;
+  margin: 0 auto var(--s4);
+  padding: 9px 16px;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid var(--ink-line);
+  background: rgba(36, 43, 62, .7);
+  color: var(--moon-dim);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color .18s, border-color .18s;
+}
+.gg__song:hover { color: var(--moon-glow); border-color: var(--moon-glow); }
+
+/* ─────────────── 추석 엽서 쓰기 ─────────────── */
+
+/* 받을 사람 고르기 — 두 칸씩, 손가락으로 누르는 크기 */
+.pc__who {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s3);
+  margin-bottom: var(--s5);
+}
+@media (min-width: 560px) { .pc__who { grid-template-columns: repeat(3, 1fr); } }
+
+.pc__whocard {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--s2);
+  min-height: 104px;
+  padding: var(--s4) var(--s2);
+  border-radius: var(--r-md);
+  background: rgba(36, 43, 62, .82);
+  border: 1px solid var(--ink-line);
+  color: var(--moon);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .14s var(--ease), border-color .18s, background .18s;
+}
+.pc__whoicon { font-size: 30px; line-height: 1; }
+.pc__whocard b { font-family: var(--font-title); font-size: 14.5px; font-weight: 700; }
+.pc__whocard:hover,
+.pc__whocard:focus-visible { outline: none; border-color: var(--moon-glow); }
+.pc__whocard:active { transform: scale(.97); }
+.pc__whocard.on {
+  border-color: var(--moon-glow);
+  background: rgba(242, 201, 107, .16);
+}
+
+.pc__label {
+  display: block;
+  margin: var(--s4) 0 var(--s2);
+  font-size: 13.5px;
+  color: var(--moon-glow);
+}
+
+/* 인사말 고르기 — 긴 문장이라 한 줄에 하나씩 */
+.pc__greets { display: grid; gap: 6px; }
+.pc__greet {
+  padding: 11px 14px;
+  border-radius: var(--r-sm);
+  background: rgba(36, 43, 62, .7);
+  border: 1px solid var(--ink-line);
+  color: var(--moon-dim);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .18s, color .18s, background .18s;
+}
+.pc__greet:hover,
+.pc__greet:focus-visible { outline: none; border-color: var(--moon-glow); color: var(--moon); }
+.pc__greet.on {
+  border-color: var(--moon-glow);
+  background: rgba(242, 201, 107, .14);
+  color: var(--moon);
+  font-family: var(--font-title);
+}
+
+.pc__count {
+  margin: 6px 2px 0;
+  text-align: right;
+  font-size: 12px;
+  color: var(--moon-dim);
+}

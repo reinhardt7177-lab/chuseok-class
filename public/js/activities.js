@@ -6,7 +6,7 @@
  * 틀려도 막지 않고 왜 그런지를 보여준 뒤 넘어간다.
  */
 
-import { WORD_CARDS, SONGPYEON, GANGGANG, DISCUSS, WISH } from './data/activities.js';
+import { POSTCARD, WORD_CARDS, SONGPYEON, GANGGANG, DISCUSS, WISH } from './data/activities.js';
 import { ROWS, ALL_SLOTS, LESSON as CHARYE_LESSON } from './data/charye-table.js';
 import { REFLECTION } from './data/quiz.js';
 import { attachSaveButton } from './shared/card.js';
@@ -468,21 +468,7 @@ function songpyeon(host, ctx) {
     host.querySelector('#spAgain').onclick = () => songpyeon(host, ctx);
     ctx.api.score('songpyeon', right * 50, chosen);
 
-    attachSaveButton(host.querySelector('.act'), () => ({
-      kind: '송편', name: ctx.name,
-      heading: '내가 빚은 송편',
-      subheading: `${chosen.dough?.label ?? ''} 반죽에 ${chosen.filling?.label ?? ''} 소`,
-      emoji: '🥟',
-      chips: [
-        chosen.dough?.label,
-        `${KNEADS}번 치댐`,
-        chosen.filling?.label,
-        chosen.shape === 'half' ? '반달' : chosen.shape === 'full' ? '보름달' : '별',
-        chosen.steam?.label,
-      ].filter(Boolean),
-      note: '전통 송편은 반달 모양으로 빚어 솔잎을 깔고 찝니다. '
-          + '보름달은 이미 다 찬 달이지만 반달은 앞으로 더 커질 달이라, 채워질 앞날을 바라는 뜻이라고 해요.',
-    }));
+    /* 송편은 그림으로 저장하지 않는다 — 선생님 요청. 빚는 재미까지만. */
   }
 
   pickDough();
@@ -741,6 +727,8 @@ function ganggangsullae(host, ctx) {
 
       <div class="gg" id="ggStage">
         <div class="gg__ring" id="ggRing"></div>
+        <!-- 다음 박에 맞춰 오므라드는 원. 달 테두리에 닿는 순간이 누를 때다. -->
+        <span class="gg__timing" id="ggTiming"></span>
         <button class="gg__moon" id="ggMoon">
           <span id="ggMoonText">누르면 시작</span>
         </button>
@@ -748,6 +736,11 @@ function ganggangsullae(host, ctx) {
       </div>
 
       <div class="gg__call" id="ggCall"></div>
+
+      <!-- 진짜 노래는 국립국악원 영상으로 듣는다.
+           음원을 저장소에 넣지 않는 것은 저작권 때문이다. -->
+      <a class="gg__song" href="https://www.youtube.com/watch?v=zjg757sy8k8"
+         target="_blank" rel="noopener">🎵 국립국악원 강강술래 노래 들어보기</a>
       <div class="progress" id="ggBar"></div>
       <div id="ggWhy"></div>
     </div>`;
@@ -757,6 +750,7 @@ function ganggangsullae(host, ctx) {
   const moon = host.querySelector('#ggMoon');
   const moonText = host.querySelector('#ggMoonText');
   const comboEl = host.querySelector('#ggCombo');
+  const timingEl = host.querySelector('#ggTiming');
 
   ring.innerHTML = Array.from({ length: DANCERS }, (_, i) =>
     `<span class="gg__dancer" style="--a:${STEP * i}deg">
@@ -774,7 +768,12 @@ function ganggangsullae(host, ctx) {
       const o = ac.createOscillator();
       const g = ac.createGain();
 
-      if (kind === 'beat') {            // 북 — 낮고 둔탁하게
+      if (kind === 'down') {            // 첫 박 — 북을 세게 (네 박마다)
+        o.type = 'sine';
+        o.frequency.setValueAtTime(230, t);
+        o.frequency.exponentialRampToValueAtTime(52, t + 0.16);
+        g.gain.setValueAtTime(0.42, t);
+      } else if (kind === 'beat') {     // 북 — 낮고 둔탁하게
         o.type = 'sine';
         o.frequency.setValueAtTime(190, t);
         o.frequency.exponentialRampToValueAtTime(58, t + 0.12);
@@ -856,7 +855,8 @@ function ganggangsullae(host, ctx) {
     beat = 0;
     const interval = 60000 / r.bpm;
 
-    host.querySelector('#ggHint').textContent = `${r.name} · 1분에 ${r.bpm}박`;
+    host.querySelector('#ggHint').textContent =
+      `${r.name} · 오므라드는 원이 달에 닿을 때 누르세요`;
     host.querySelector('#ggCall').innerHTML =
       `<span class="gg__lead">${ctx.esc(r.call)}</span>
        <span class="gg__resp">${ctx.esc(r.response)}</span>`;
@@ -864,7 +864,24 @@ function ganggangsullae(host, ctx) {
     ring.style.setProperty('--spin', `${Math.min(280, interval * 0.55)}ms`);
 
     clearInterval(timer);
-    timer = setInterval(() => {
+
+    /* 셈여림 넷을 먼저 준다 — 언제 눌러야 하는지 몸에 익히고 시작하게.
+       이 동안은 점수를 세지 않는다. */
+    let countIn = 4;
+    const tick = () => {
+      if (countIn > 0) {
+        aimAt(Date.now() + interval);     // 다음 박을 향해 원이 오므라든다
+        sound('beat');
+        moonText.textContent = String(countIn);
+        moon.classList.add('pulse', 'count');
+        if (countIn === 1) setTimeout(() => moon.classList.remove('count'), interval);
+        moon.classList.add('pulse');
+        setTimeout(() => moon.classList.remove('pulse'), Math.min(260, interval * 0.6));
+        countIn -= 1;
+        if (countIn === 0) expected = Date.now() + interval;   // 첫 진짜 박
+        return;
+      }
+
       if (beat >= r.beats) return nextRound();
 
       /* 지난 박을 그냥 넘겼으면 놓친 것으로 친다 */
@@ -872,16 +889,36 @@ function ganggangsullae(host, ctx) {
 
       beat += 1;
       counted = false;
+      /* 지금이 이번 박이고, 원은 다음 박을 향해 다시 오므라든다 */
       expected = Date.now();
+      aimAt(Date.now() + interval);
 
-      sound('beat');
+      sound(beat % 4 === 1 ? 'down' : 'beat');    // 네 박마다 첫 박을 세게
       moon.classList.add('pulse');
       moonText.textContent = beat % 2 ? '강강' : '술래';
       setTimeout(() => moon.classList.remove('pulse'), Math.min(280, interval * 0.7));
 
       host.querySelector('#ggBar').innerHTML =
         Array.from({ length: r.beats }, (_, i) => `<i class="${i < beat ? 'ok' : ''}"></i>`).join('');
-    }, interval);
+    };
+
+    tick();
+    timer = setInterval(tick, interval);
+  }
+
+  /**
+   * 다음 박을 향해 원을 오므린다.
+   *
+   * 예전에는 달이 번쩍이는 것만으로 알려 줬는데, 번쩍인 뒤에 누르면 이미 늦다.
+   * 눈에 보이는 것이 "이미 지난 박"이라 언제 눌러야 할지 알 수가 없었다.
+   * 이제는 원이 줄어드는 것을 보고 달 테두리에 닿는 순간을 겨냥하면 된다.
+   */
+  function aimAt(at) {
+    const ms = at - Date.now();
+    if (ms <= 0) return;
+    timingEl.style.animation = 'none';
+    void timingEl.offsetWidth;                    // 애니메이션을 처음부터 다시
+    timingEl.style.animation = `gg-aim ${ms}ms linear`;
   }
 
   function nextRound() {
@@ -1088,10 +1125,117 @@ function reflect(host, ctx) {
   };
 }
 
+/* ═══════════════ 추석 엽서 쓰기 ═══════════════ */
+
+/**
+ * 수업을 닫는 활동. 받을 사람을 먼저 고르고, 인사말을 고르고, 하고 싶은 말을 적는다.
+ *
+ * 소원 적기는 "내가 바라는 것"이라 혼자 쓰면 되지만,
+ * 엽서는 "누구에게" 쓰는지가 정해져야 무슨 말을 쓸지 떠오른다.
+ * 그래서 받을 사람을 고르는 단계를 앞에 두었다.
+ */
+function postcard(host, ctx) {
+  let to = null;
+  let greeting = POSTCARD.greetings[0];
+
+  host.innerHTML = `
+    <div class="act">
+      <div class="act__head">
+        <h2>💌 추석 엽서 쓰기</h2>
+        <p>누구에게 보낼지 먼저 골라요.</p>
+      </div>
+
+      <div class="pc__who" id="pcWho">
+        ${POSTCARD.toWhom.map((w) => `
+          <button class="pc__whocard" data-who="${w.id}">
+            <span class="pc__whoicon">${w.icon}</span>
+            <b>${ctx.esc(w.label)}</b>
+          </button>`).join('')}
+      </div>
+
+      <div id="pcWrite" hidden>
+        <p class="act__step" id="pcHint"></p>
+
+        <label class="pc__label">인사말 고르기</label>
+        <div class="pc__greets" id="pcGreets">
+          ${POSTCARD.greetings.map((g, i) => `
+            <button class="pc__greet ${i === 0 ? 'on' : ''}" data-g="${i}">${ctx.esc(g)}</button>`).join('')}
+        </div>
+
+        <label class="pc__label" for="pcText">하고 싶은 말</label>
+        <textarea class="textbox" id="pcText" maxlength="${POSTCARD.maxLen}"
+                  placeholder="마음을 담아 적어 보세요"></textarea>
+        <div class="pc__count"><span id="pcNum">0</span> / ${POSTCARD.maxLen}자</div>
+
+        <button class="btn btn--primary btn--lg" id="pcDone" style="width:100%;margin-top:8px">
+          엽서 완성하기
+        </button>
+      </div>
+
+      <div id="pcResult"></div>
+    </div>`;
+
+  const $$ = (id) => host.querySelector(id);
+
+  /* ── 받을 사람 고르기 ── */
+  $$('#pcWho').onclick = (e) => {
+    const btn = e.target.closest('[data-who]');
+    if (!btn) return;
+    to = POSTCARD.toWhom.find((w) => w.id === btn.dataset.who);
+    for (const b of host.querySelectorAll('.pc__whocard')) b.classList.toggle('on', b === btn);
+    $$('#pcWrite').hidden = false;
+    $$('#pcHint').textContent = to.hint;
+    $$('#pcText').focus();
+  };
+
+  /* ── 인사말 고르기 ── */
+  $$('#pcGreets').onclick = (e) => {
+    const btn = e.target.closest('[data-g]');
+    if (!btn) return;
+    greeting = POSTCARD.greetings[Number(btn.dataset.g)];
+    for (const b of host.querySelectorAll('.pc__greet')) b.classList.toggle('on', b === btn);
+  };
+
+  const ta = $$('#pcText');
+  ta.oninput = () => { $$('#pcNum').textContent = ta.value.length; };
+
+  /* ── 완성 ── */
+  $$('#pcDone').onclick = async () => {
+    const text = ta.value.trim();
+    if (!text) { ta.focus(); return; }
+
+    /* 엽서도 생각쓰기와 같은 자리에 모은다 — 선생님이 한 곳에서 본다 */
+    await ctx.api.reflection(`${to.label} — ${greeting}`, text);
+
+    $$('#pcResult').innerHTML = `
+      <div class="act__done">
+        <div class="big">💌</div>
+        <h3>엽서를 다 썼어요</h3>
+        <p style="color:var(--moon-dim);font-size:14.5px;margin-top:8px;line-height:1.7">
+          아래에서 엽서로 저장한 뒤<br>패들릿에 올리거나 직접 전해 주세요.
+        </p>
+      </div>`;
+    $$('#pcDone').disabled = true;
+
+    if (!host.querySelector('.save-card')) {
+      attachSaveButton(host.querySelector('#pcResult'), () => ({
+        style: 'postcard',
+        kind: '추석엽서', name: ctx.name,
+        lead: to.label,
+        notes: [
+          { label: greeting, text },
+        ],
+        note: '더도 말고 덜도 말고 한가위만 같아라.',
+      }), '엽서로 저장하기');
+    }
+  };
+}
+
 /* ═══════════════ 내보내기 ═══════════════ */
 
 export const ACTIVITIES = {
   'word-cards': wordCards,
+  postcard,
   songpyeon,
   charye,
   ganggangsullae,

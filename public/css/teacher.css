@@ -55,6 +55,7 @@ body { overflow: hidden; }
   flex: 1;
 }
 .scene__main--wide { max-width: min(58vw, 860px); }
+.scene__main--full { max-width: none; width: 100%; }
 
 .cut__text {
   font-size: clamp(22px, min(3.2vw, 4.6vh), 52px);
@@ -604,7 +605,7 @@ body { overflow: hidden; }
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 12vw, 176px), 1fr));
   gap: clamp(8px, 1.2vw, 20px);
-  align-content: center;
+  align-content: start;          /* 넘쳐도 위쪽 달은 늘 보이게 */
   justify-items: center;
   max-height: 62vh;
   overflow: hidden;

@@ -126,6 +126,29 @@ export const DISCUSS = {
 
 /* ─────────────── 소원 ─────────────── */
 
+/**
+ * 추석 엽서 쓰기 — 수업을 닫는 활동.
+ *
+ * 소원 적기가 "내가 바라는 것"이라면, 엽서는 "남에게 건네는 말"이다.
+ * 받을 사람을 먼저 고르게 하면 무엇을 쓸지가 훨씬 쉬워진다.
+ */
+export const POSTCARD = {
+  toWhom: [
+    { id: 'family',   icon: '👨‍👩‍👧', label: '가족에게',      hint: '고마웠던 일 한 가지를 떠올려 보세요' },
+    { id: 'friend',   icon: '🙋',      label: '친구에게',      hint: '같이 있어 좋았던 때를 적어 보세요' },
+    { id: 'teacher',  icon: '🍎',      label: '선생님께',      hint: '올해 배운 것 중 기억에 남는 것을' },
+    { id: 'future',   icon: '🌱',      label: '내년의 나에게', hint: '한 해 뒤의 나에게 남기는 말' },
+    { id: 'ancestor', icon: '🕯️',      label: '조상님께',      hint: '오늘 배운 것을 떠올리며' },
+  ],
+  greetings: [
+    '더도 말고 덜도 말고 한가위만 같아라',
+    '풍성한 한가위 되세요',
+    '보름달처럼 환한 날 되세요',
+    '올 추석도 건강하세요',
+  ],
+  maxLen: 120,
+};
+
 export const WISH = {
   prompts: [
     { id: 'me', label: '나를 위한 소원', emoji: '🙋', placeholder: '내가 바라는 것을 적어요' },
