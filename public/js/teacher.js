@@ -37,6 +37,7 @@ const state = {
 
 let snap = null;      // 서버에서 받은 교실 상태
 let connect = null;   // QR·코드
+let quizStarting = false; // 시작 직후 대기실 갱신이 첫 문제를 덮어쓰지 않도록
 
 /* 이 화면이 연 방의 열쇠. 새로고침해도 같은 방으로 돌아오도록 저장해 둔다.
    로그인이 없는 앱이라, 이 열쇠가 곧 "이 방은 내 방"이라는 증표다. */
@@ -96,7 +97,7 @@ function paint() {
   if (snap?.live?.on && !LIVE_CUTS.includes(cut?.kind)) live('close');
 
   /* 컷에 들어서면 그 단계를 학생 화면에도 알린다 */
-  if (cut?.kind === 'lobby' && snap?.live?.phase !== 'lobby') live('lobby', { total: cut.total });
+  if (cut?.kind === 'lobby' && !quizStarting && snap?.live?.phase !== 'lobby') live('lobby', { total: cut.total });
   if (cut?.kind === 'rank' && snap?.live?.phase !== 'final') live('final');
 
   if (cut?.art) renderStage($('scene'), cut.art.id, { motion: cut.art.motion, layers: cut.art.layers });
@@ -270,12 +271,20 @@ function paintCut(cut) {
       /* 대기실에서 바로 첫 문제로 — 넘기고 또 여는 두 번 수고를 없앤다.
          점수를 비우는 것은 여기, 시작을 누르는 순간뿐이다. */
       host.querySelector('#quizGo').onclick = async () => {
-        await live('reset');
-        step(1);
-        const first = currentBeats()[state.beat];
-        if (first?.kind !== 'quiz') return;
-        const opts = first.q.type === 'ox' ? 2 : first.q.options.length;
-        live('open', { index: first.qIndex, questionId: first.q.id, choiceCount: opts, limitMs: 20000, total: first.total });
+        const button = host.querySelector('#quizGo');
+        button.disabled = true;
+        quizStarting = true;
+        try {
+          if (!(await live('reset', {}, { repaint: false }))) {
+            button.disabled = false;
+            return;
+          }
+          step(1);
+          const first = currentBeats()[state.beat];
+          if (first?.kind === 'quiz') await openQuizCut(first);
+        } finally {
+          quizStarting = false;
+        }
       };
       break;
     }
@@ -396,15 +405,24 @@ function quizHtml(cut) {
     </div>`;
 }
 
-async function live(action, extra = {}) {
+function openQuizCut(cut) {
+  const opts = cut.q.type === 'ox' ? 2 : cut.q.options.length;
+  return live('open', { index: cut.qIndex, questionId: cut.q.id, choiceCount: opts, limitMs: 20000, total: cut.total });
+}
+
+async function live(action, extra = {}, { repaint = true } = {}) {
   try {
-    if (!roomKey) return;
+    if (!roomKey) return false;
     const res = await fetch('/api/teacher/live', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ key: roomKey, action, ...extra }),
     });
-    if (res.ok) { snap = await res.json(); paint(); }
+    if (!res.ok) return false;
+    snap = await res.json();
+    if (repaint) paint();
+    return true;
   } catch { /* 서버가 잠깐 끊겨도 화면은 유지 */ }
+  return false;
 }
 
 /* 남은 시간 막대를 부드럽게 줄인다 */
@@ -465,11 +483,16 @@ function step(dir) {
   const count = currentBeats().length;
   const next = state.beat + dir;
   if (next >= 0 && next < count) {
+    const previousCut = currentBeats()[state.beat];
+    const advanceLiveQuiz = dir > 0 && previousCut?.kind === 'quiz'
+      && snap?.live?.questionId === previousCut.q.id && snap.live.revealed;
     state.beat = next;
     paint();
     /* 컷만 넘겨도 서버에 알려야 한다. 활동을 여는 컷이 있어서,
        여기서 안 보내면 학생 화면에 소원 칸이 안 뜬다. */
     pushState();
+    const nextCut = currentBeats()[state.beat];
+    if (advanceLiveQuiz && nextCut?.kind === 'quiz') openQuizCut(nextCut);
     return;
   }
   if (dir > 0 && state.index < LAST) return goto(state.index + 1);
@@ -643,11 +666,10 @@ document.addEventListener('click', (e) => {
   if (lv) {
     const cut = currentBeats()[state.beat];
     if (lv.dataset.live === 'open') {
-      const opts = cut.q.type === 'ox' ? 2 : cut.q.options.length;
-      return live('open', { index: cut.qIndex, questionId: cut.q.id, choiceCount: opts, limitMs: 20000, total: cut.total });
+      return openQuizCut(cut);
     }
     if (lv.dataset.live === 'reveal') return live('reveal');
-    if (lv.dataset.live === 'next') { live('close'); return step(1); }
+    if (lv.dataset.live === 'next') return step(1);
   }
 });
 
