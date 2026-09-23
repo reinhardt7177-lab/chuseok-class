@@ -46,6 +46,7 @@ const solo = {
   index: 0,
   band: 'mid',
   activityOpen: false,
+  complete: false,
 };
 
 /* ═══════════════ 서버 호출 ═══════════════ */
@@ -192,7 +193,7 @@ function apply(view) {
   /* 라이브 퀴즈가 열려 있으면 무조건 그 화면이 먼저다 */
   if (view.live?.on) {
     const key = `live|${view.live.phase}|${view.live.questionId}|${view.live.revealed}|${view.live.answered}`;
-    if (key !== renderedKey) { renderedKey = key; renderLive(view); }
+    if (key !== renderedKey) { renderedKey = key; window.scrollTo(0, 0); renderLive(view); }
     return;
   }
 
@@ -212,6 +213,7 @@ function apply(view) {
     return;
   }
   renderedKey = key;
+  window.scrollTo(0, 0);
 
   const section = SECTION_BY_ID[view.sectionId];
   if (!section) return;
@@ -370,15 +372,19 @@ function renderMenu(view) {
   /* 여기서 직접 표시해야 한다. 예전에는 apply()만 설정해서,
      뒤로가기로 메뉴에 온 뒤 다음 서버 갱신이 열어둔 활동을 덮어썼다. */
   renderedKey = 'menu';
-  $('nowLabel').textContent = '활동 고르기';
+  $('nowLabel').textContent = solo.on ? '마무리 활동' : '활동 고르기';
+  if (solo.on) $('soloFoot').hidden = false;
+  const choices = solo.on
+    ? [{ id: 'solo-quiz', icon: '❓', label: '배운 내용 퀴즈' }, ...MENU]
+    : MENU;
   $('content').innerHTML = `
     <div class="menu">
       <div class="menu__head">
-        <h2>무엇을 해볼까요?</h2>
-        <p>마치면 <b>그림으로 저장</b>을 눌러 패들릿에 올려요.</p>
+        <h2>${solo.on ? '끝까지 잘 살펴봤어요! 🌕' : '무엇을 해볼까요?'}</h2>
+        <p>${solo.on ? '마음에 드는 활동을 더 해보세요. 추석 엽서로 마음을 전해도 좋아요.' : '하고 싶은 활동을 골라 보세요. 완성한 작품은 그림으로 저장할 수 있어요.'}</p>
       </div>
       <div class="menu__grid">
-        ${MENU.map((m) => `
+        ${choices.map((m) => `
           <button class="menucard" data-act="${m.id}">
             <span class="menucard__icon">${m.icon}</span>
             <b>${m.label}</b>
@@ -396,12 +402,71 @@ function renderMenu(view) {
 function openActivity(id, view) {
   renderedKey = `act:${id}`;      // 서버 갱신이 이 화면을 덮어쓰지 않게
   const fake = SECTIONS.find((s) => s.activity === id) ?? SECTIONS[0];
+  if (solo.on) $('soloFoot').hidden = true;
+  window.scrollTo(0, 0);
   $('content').innerHTML = `
     <button class="backbtn" id="backBtn">◀ 다른 활동 고르기</button>
     <div id="actHost"></div>`;
   $('backBtn').onclick = () => { renderedKey = null; renderMenu(last ?? view); };
-  ACTIVITIES[id]($('actHost'), { band: view.band, api, section: fake, esc, name: me.name });
+  if (id === 'solo-quiz') renderSoloQuiz($('actHost'), view.band);
+  else ACTIVITIES[id]($('actHost'), { band: view.band, api: solo.on ? soloApi : api, section: fake, esc, name: me.name });
   if (id === 'moon-wish') updateWall(last ?? view);
+}
+
+function renderSoloQuiz(host, band) {
+  const questions = quizFor(band);
+  let index = 0;
+  let correct = 0;
+
+  const show = () => {
+    if (index === questions.length) {
+      host.innerHTML = `
+        <div class="act solo-quiz solo-quiz--done">
+          <div class="live__big">🌕</div>
+          <h2>퀴즈를 모두 풀었어요!</h2>
+          <p>${questions.length}문제 중 <b>${correct}문제</b>를 맞혔어요.</p>
+          <button class="btn btn--primary btn--lg" id="quizRetry">다시 풀기</button>
+        </div>`;
+      host.querySelector('#quizRetry').onclick = () => { index = 0; correct = 0; show(); };
+      return;
+    }
+
+    const q = questions[index];
+    const options = q.type === 'ox' ? ['⭕ 맞아요', '❌ 아니에요'] : q.options;
+    const answer = q.type === 'ox' ? (q.answer ? 0 : 1) : q.answer;
+    host.innerHTML = `
+      <div class="act solo-quiz">
+        <div class="act__head">
+          <span class="act__step">배운 내용 퀴즈 · ${index + 1} / ${questions.length}</span>
+          <h2>${esc(q.q)}</h2>
+        </div>
+        <div class="progress" aria-label="${index + 1} / ${questions.length} 문제">
+          ${questions.map((_, i) => `<i class="${i < index ? 'ok' : i === index ? 'on' : ''}"></i>`).join('')}
+        </div>
+        <div id="soloQuizOptions">
+          ${options.map((option, i) => `<button class="tap" data-choice="${i}">${esc(option)}</button>`).join('')}
+        </div>
+        <div id="soloQuizResult" role="status" aria-live="polite"></div>
+      </div>`;
+
+    host.querySelector('#soloQuizOptions').onclick = (event) => {
+      const picked = event.target.closest('[data-choice]');
+      if (!picked || host.querySelector('#soloQuizResult').textContent) return;
+      const hit = Number(picked.dataset.choice) === answer;
+      if (hit) correct++;
+      for (const button of host.querySelectorAll('[data-choice]')) {
+        button.disabled = true;
+        if (Number(button.dataset.choice) === answer) button.classList.add('right');
+        else if (button === picked) button.classList.add('wrong');
+      }
+      host.querySelector('#soloQuizResult').innerHTML = `
+        <div class="why ${hit ? '' : 'no'}">${hit ? '정답이에요!' : `정답: ${esc(options[answer])}`}<br>${esc(q.why)}</div>
+        <button class="btn btn--primary btn--lg solo-quiz__next" id="quizNext">${index === questions.length - 1 ? '결과 보기' : '다음 문제 →'}</button>`;
+      host.querySelector('#quizNext').onclick = () => { index++; show(); window.scrollTo(0, 0); };
+    };
+  };
+
+  show();
 }
 
 function renderReading(section, view) {
@@ -446,7 +511,7 @@ function renderReading(section, view) {
         <div class="wait" style="padding:32px 0 0">
           <p style="font-size:14px">
             이 장면에는 <b style="color:var(--moon-glow)">활동</b>이 있어요.<br>
-            선생님이 열어 주면 바로 시작됩니다.
+            ${solo.on ? '아래의 ‘활동 하기’를 누르면 시작돼요.' : '선생님이 열어 주면 바로 시작됩니다.'}
           </p>
         </div>` : ''}
     </div>`;
@@ -512,11 +577,24 @@ function startSolo() {
  * 혼자 하는 것이니 활동을 건너뛸 수도 있어야 한다.
  */
 function soloGo(dir) {
+  if (solo.complete) {
+    if (dir < 0) solo.complete = false;
+    else return;
+    renderedKey = null;
+    soloPaint();
+    window.scrollTo(0, 0);
+    return;
+  }
+
   const section = SECTIONS[solo.index];
   const hasAct = !!(section.activity && ACTIVITIES[section.activity]);
 
-  if (dir > 0 && hasAct && !solo.activityOpen) {
+  if (dir < 0 && solo.activityOpen) {
+    solo.activityOpen = false;
+  } else if (dir > 0 && hasAct && !solo.activityOpen) {
     solo.activityOpen = true;
+  } else if (dir > 0 && solo.index === SECTIONS.length - 1) {
+    solo.complete = true;
   } else {
     solo.activityOpen = false;
     solo.index = Math.max(0, Math.min(SECTIONS.length - 1, solo.index + dir));
@@ -530,15 +608,18 @@ function soloPaint() {
   const section = SECTIONS[solo.index];
   const hasAct = !!(section.activity && ACTIVITIES[section.activity]);
 
-  $('nowLabel').textContent = section.title;
-  $('soloPos').textContent = `${solo.index + 1} / ${SECTIONS.length}`;
+  $('nowLabel').textContent = solo.complete ? '마무리 활동' : section.title;
+  $('soloFoot').hidden = false;
+  $('soloPos').textContent = solo.complete ? '학습 완료' : `${solo.index + 1} / ${SECTIONS.length}${solo.activityOpen ? ' · 활동' : ''}`;
   $('soloPrev').disabled = solo.index === 0 && !solo.activityOpen;
-  $('soloNext').disabled = solo.index === SECTIONS.length - 1 && (!hasAct || solo.activityOpen);
-  $('soloNext').textContent = hasAct && !solo.activityOpen ? '활동 하기 ▶' : '다음 ▶';
+  $('soloNext').disabled = solo.complete;
+  $('soloNext').textContent = solo.complete ? '완료' : solo.index === SECTIONS.length - 1 ? '마무리 ▶' : hasAct && !solo.activityOpen ? '활동 하기 ▶' : '다음 ▶';
 
   const fake = { band: solo.band, sectionId: section.id, activityOpen: solo.activityOpen, wishTexts: [] };
 
-  if (solo.activityOpen && hasAct) {
+  if (solo.complete) {
+    renderMenu(fake);
+  } else if (solo.activityOpen && hasAct) {
     $('content').innerHTML = '<div id="actHost"></div>';
     ACTIVITIES[section.activity]($('actHost'), {
       band: solo.band, api: soloApi, section, esc, name: me.name,
