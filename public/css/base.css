@@ -113,15 +113,15 @@ img { max-width: 100%; display: block; }
   will-change: transform;
 }
 
-/* 글을 얹을 자리를 어둡게 — 읽히지 않으면 수업이 안 된다 */
+/* 글 주변만 은은하게 어둡게 — 삽화 전체를 탁하게 덮지 않는다 */
 .stage__scrim {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(to top,    rgba(16, 19, 28, .94) 0%, rgba(16, 19, 28, .55) 38%, rgba(16, 19, 28, .12) 70%),
-    linear-gradient(to right,  rgba(16, 19, 28, .80) 0%, rgba(16, 19, 28, .25) 45%, transparent 75%);
+    linear-gradient(to top,   rgba(16, 19, 28, .65) 0%, rgba(16, 19, 28, .24) 34%, transparent 68%),
+    linear-gradient(to right, rgba(16, 19, 28, .28) 0%, rgba(16, 19, 28, .10) 42%, transparent 70%);
 }
 
 .stage__scrim--soft {
