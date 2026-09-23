@@ -173,6 +173,11 @@ function setConn(ok) {
 }
 
 function rejoin() {
+  /* 방이 사라졌으면 붙잡고 있던 연결과 확인을 놓는다.
+     안 놓으면 옛 아이디로 3초마다 다시 붙으려 하고 6초마다 물어본다 — 서버가
+     다시 켜질 때마다 서른 대가 헛요청을 끝없이 보내 그 서버를 또 느리게 한다. */
+  es?.close(); es = null;
+  clearInterval(pollTimer); pollTimer = null;
   $('main').hidden = true;
   $('enter').hidden = false;
   $('err').textContent = '수업방이 다시 열렸어요. 새 코드를 넣어 주세요.';

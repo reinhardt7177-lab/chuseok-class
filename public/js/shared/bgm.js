@@ -28,7 +28,9 @@ export function mountBgm(host, { before = null, src = 'assets/audio/bgm.mp3', vo
     audio.src = src;
     audio.loop = true;
     audio.volume = volume;
-    audio.preload = 'auto';
+    /* 4.3MB다. 선생님이 처음 누르기 전까지는 한 바이트도 받지 않는다 —
+       어차피 첫 클릭 전에는 틀 수 없고, 그 사이 그림 받을 길을 막을 뿐이다. */
+    audio.preload = 'none';
     audio.setAttribute('aria-hidden', 'true');
     audio.hidden = true;
     document.body.append(audio);

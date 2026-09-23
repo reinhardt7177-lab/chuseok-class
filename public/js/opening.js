@@ -93,4 +93,5 @@ renderStage(document.getElementById('stage'), 'landing-hero', {
 mountBgm(document.querySelector('.open__foot'), { before: document.querySelector('.open__student') });
 
 /* 다음에 바로 쓸 삽화를 미리 받아둔다 */
-preload(['opening-moonrise', 'opening-village-far', 'student-welcome']);
+/* 추석을 누르면 바로 보일 첫 컷 한 장만. 학생 화면 그림은 이 프로젝터에서 쓸 일이 없다. */
+preload(['opening-moonrise']);

@@ -23,6 +23,14 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT ?? 8088);
 
 const app = express();
+/**
+ * 상태 검사 자리. Render가 몇 초마다 부른다.
+ * 예전엔 '/'(index.html)를 봤는데, 파일을 읽어야 해서 CPU를 조일 때 제일 먼저 늦었다.
+ * 늦으면 Render가 서버를 죽이고 다시 켠다 — 열린 수업방이 모두 사라진다.
+ * 여기는 파일도 방도 건드리지 않고 곧바로 답한다.
+ */
+app.get('/healthz', (req, res) => res.type('text').send('ok'));
+
 app.use(express.json({ limit: '256kb' }));
 /**
  * 정적 파일.

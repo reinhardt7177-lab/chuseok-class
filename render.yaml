@@ -21,7 +21,7 @@ services:
     region: singapore          # 한국에서 가장 가깝다
     buildCommand: npm ci --omit=dev
     startCommand: node server/server.js
-    healthCheckPath: /
+    healthCheckPath: /healthz      # 파일을 읽지 않는 가벼운 자리
     envVars:
       - key: NODE_VERSION
         value: "20"

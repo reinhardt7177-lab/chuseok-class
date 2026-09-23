@@ -10,7 +10,7 @@
 import { SECTIONS, BANDS, BAND_ORDER, resolveSection, totalMinutes, beatsFor } from './data/lesson.js';
 import { defaultVideo, formatDuration, embedUrl, watchUrl } from './data/videos.js';
 import { quizFor, titleFor } from './data/quiz.js';
-import { assetsFor } from './shared/assets.js';
+import { assetsFor, heroFor } from './shared/assets.js';
 import { renderStage, preload } from './shared/stage.js';
 import { hasServer, qrDataUrl } from './shared/offline.js';
 import { mountBgm, holdBgm } from './shared/bgm.js';
@@ -90,6 +90,9 @@ function paint() {
 
   /* 영상이 나올 땐 음악을 쉰다. 유튜브 소리 위에 겹치면 둘 다 안 들린다. */
   holdBgm(cut?.kind === 'video');
+
+  /* 곧 넘길 컷의 그림만 미리 */
+  queueMicrotask(lookahead);
 
   /* 대기실·문제·시상식을 모두 벗어나면 라이브를 닫는다.
      안 닫으면 학생 기기가 퀴즈 화면에 갇혀서 다음으로 못 넘어간다. */
@@ -475,8 +478,30 @@ function goto(i, beat = 0) {
   paint();
   pushState();
 
-  const next = SECTIONS[state.index + 1];
-  if (next) preload(assetsFor(next.id).map((a) => a.id));
+}
+
+/**
+ * 곧 볼 그림만 미리 받는다 — 지금 컷 다음 두 장, 장면 끝이면 다음 장면 첫 장.
+ *
+ * 예전에는 장면에 들어서면 다음 장면 그림을 통째로(대개 7~10장, 4~6MB) 받았고,
+ * 화면을 열자마자 첫 장면 그림 7장(3.9MB)을 받았다. 교실 와이파이를 학생 서른 대가
+ * 나눠 쓰면 이 짐이 모두의 발목을 잡는다. 두 컷 앞이면 넘길 때 흰 화면이 번쩍이지 않는다.
+ */
+const preloaded = new Set();
+function lookahead() {
+  const list = currentBeats();
+  const ids = [];
+  for (let i = state.beat + 1; i <= state.beat + 2 && i < list.length; i += 1) {
+    if (list[i]?.art?.id) ids.push(list[i].art.id);
+  }
+  if (state.beat + 2 >= list.length) {
+    const next = SECTIONS[state.index + 1];
+    const hero = next && heroFor(next.id);
+    if (hero) ids.push(hero.id);
+  }
+  const fresh = ids.filter((id) => !preloaded.has(id));
+  fresh.forEach((id) => preloaded.add(id));
+  if (fresh.length) preload(fresh);
 }
 
 function step(dir) {
@@ -706,4 +731,5 @@ ensureRoom().then(() => {
 });
 setInterval(() => { if (state.picked) paintSide(); }, 1000);
 setTimeout(() => $('hintFs')?.remove(), 9000);
-preload(assetsFor('opening').map((a) => a.id));
+/* 학년을 고르기 전에는 첫 컷 한 장만 — 나머지는 넘기면서 받는다 */
+{ const h = heroFor('opening'); if (h) { preloaded.add(h.id); preload([h.id]); } }

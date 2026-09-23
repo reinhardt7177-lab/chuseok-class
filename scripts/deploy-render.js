@@ -83,7 +83,7 @@ async function main() {
           runtime: 'node',
           plan: 'free',
           region: REGION,
-          healthCheckPath: '/',
+          healthCheckPath: '/healthz',   // 파일을 읽지 않는 가벼운 자리
           envSpecificDetails: {
             buildCommand: 'npm ci --omit=dev',
             startCommand: 'node server/server.js',
