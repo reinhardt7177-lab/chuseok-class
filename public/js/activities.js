@@ -478,9 +478,8 @@ function songpyeon(host, ctx) {
 /* ═══════════════ 차례상 차리기 ═══════════════ */
 
 /**
- * 다섯 줄 열두 자리를 모두 놓는다.
- * 줄마다 규칙이 하나씩 적혀 있고(반서갱동·어동육서·탕·좌포우혜·조율이시),
- * 그 규칙을 보고 어디에 놓을지 스스로 정한다.
+ * 다섯 줄 열네 자리에 음식을 자유롭게 놓아 본다.
+ * 한 가지 차림 예시를 소개하지만 위치에 정답 점수를 매기지 않는다.
  *
  * 끌어다 놓기와 "눌러서 고르고 자리 누르기"를 모두 지원한다.
  * 상이 길어서 쟁반이 화면 밖으로 나가는 일이 있기 때문이다.
@@ -494,15 +493,15 @@ function charye(host, ctx) {
   host.innerHTML = `
     <div class="act act--wide">
       <div class="act__head">
-        <h2>🕯️ 차례상 차리기</h2>
-        <p>줄마다 규칙이 있어요. 규칙에 맞게 열네 가지를 놓아 봅시다.</p>
+        <h2>🕯️ 차례상 차려 보기</h2>
+        <p>아래는 한 가지 차림 예시예요. 음식을 원하는 자리에 놓아 보세요. 집집마다 차림은 달라요.</p>
       </div>
 
       <!-- 줄마다 규칙 — 상 위가 아니라 밖에 둔다 -->
       <div class="ct__legend">
         ${ROWS.map((row) => `
           <span class="ct__rule">
-            <b>${row.no}열 ${ctx.esc(row.rule)}</b>
+            <b>예시 ${row.no}열 · ${ctx.esc(row.rule)}</b>
             <i>${ctx.esc(row.hint)}</i>
           </span>`).join('')}
       </div>
@@ -572,9 +571,7 @@ function charye(host, ctx) {
     if (!item) return;
     /* 이미 다른 자리에 있으면 옮긴다 */
     for (const [k, v] of placed) if (v === item) placed.delete(k);
-    const bumped = placed.get(slotKey);
     placed.set(slotKey, item);
-    if (bumped) placed.delete(slotKey === bumped.key ? slotKey : null);
     picked = null;
     host.querySelector('#ctResult').innerHTML = '';
     checked = false;
@@ -599,6 +596,7 @@ function charye(host, ctx) {
     if (placed.has(slot.dataset.key)) {     // 놓은 것을 도로 내린다
       placed.delete(slot.dataset.key);
       host.querySelector('#ctResult').innerHTML = '';
+      checked = false;
       for (const sl of slots) sl.classList.remove('ok', 'no');
       draw();
     }
@@ -650,50 +648,41 @@ function charye(host, ctx) {
     return null;
   }
 
-  /* ── 채점 ── */
+  /* ── 활동 완료: 정해진 배치와 일치하는지 채점하지 않는다 ── */
   function check() {
     if (checked) return;
     checked = true;
 
-    let right = 0;
-    for (const slot of slots) {
-      const it = placed.get(slot.dataset.key);
-      const ok = it && it.key === slot.dataset.key;
-      slot.classList.add(ok ? 'ok' : 'no');
-      if (ok) right += 1;
-    }
-    const perfect = right === ALL_SLOTS.length;
-
     host.querySelector('#ctResult').innerHTML = `
-      <div class="why ${perfect ? '' : 'no'}">
-        <b>${perfect ? '완벽해요!' : `${right} / ${ALL_SLOTS.length} 자리 정답`}</b>
-        ${perfect ? ' 다섯 줄을 모두 바르게 차렸습니다.' : ' 빨간 자리를 다시 놓아 보세요.'}
+      <div class="why">
+        <b>차례상을 차려 보았어요!</b>
+        놓는 자리에 하나의 정답은 없어요. 아래 예시와 내 차림을 비교해 보세요.
       </div>
 
       <div class="ct__why">
         ${ALL_SLOTS.map((f) => `
           <div class="ct__whyrow">
             <img src="${artUrl(`assets/items/${f.id}.png`)}" alt="">
-            <div><b>${f.row}열 · ${ctx.esc(f.name)}</b><span>${ctx.esc(f.why)}</span></div>
+            <div><b>예시 ${f.row}열 · ${ctx.esc(f.name)}</b><span>${ctx.esc(f.why)}</span></div>
           </div>`).join('')}
       </div>
 
-      <div class="why no" style="margin-top:14px">${ctx.esc(CHARYE_LESSON.caution)}</div>
+      <div class="why" style="margin-top:14px">${ctx.esc(CHARYE_LESSON.caution)}</div>
       <button class="btn btn--sm btn--ghost" id="ctAgain" style="margin-top:12px">다시 해보기</button>`;
 
     host.querySelector('#ctAgain').onclick = () => charye(host, ctx);
-    ctx.api.score('charye', Math.round((right / ALL_SLOTS.length) * 100), {
+    ctx.api.score('charye', 100, {
       placed: [...placed.entries()].map(([k, v]) => `${k}:${v.key}`),
     });
 
     attachSaveButton(host.querySelector('#ctResult'), () => ({
       kind: '차례상', name: ctx.name,
-      heading: perfect ? '차례상을 바르게 차렸어요' : '차례상 차리기',
-      subheading: `${ALL_SLOTS.length}자리 가운데 ${right}자리 정답`,
-      big: `${right}/${ALL_SLOTS.length}`,
-      chips: ROWS.map((r) => `${r.no}열 ${r.rule}`),
-      note: '반서갱동 · 어동육서 · 좌포우혜 · 조율이시. '
-          + '다만 문헌마다 다르고 집안마다 달라서, 이것만이 정답인 것은 아니에요.',
+      heading: '나만의 차례상을 차려 보았어요',
+      subheading: `${ALL_SLOTS.length}가지 음식을 자유롭게 놓았어요`,
+      big: '완성',
+      chips: ['집집마다 다른 차림', '고마운 마음'],
+      note: '이 활동은 다섯 줄 차림의 한 가지 예시를 살펴본 것입니다. '
+          + '과일의 위치나 음식의 가짓수에 꼭 정해진 답은 없어요.',
     }));
   }
 

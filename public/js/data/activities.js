@@ -24,7 +24,7 @@ export const WORD_CARDS = {
     { term: '천신(薦新)', gloss: '그해 첫 수확을 조상께 먼저 올리는 일' },
     { term: '가가례(家家禮)', gloss: '집집마다 다른 예법 — 정답은 하나가 아님' },
     { term: '회소곡', gloss: '가배에서 진 편 여인이 불렀다는 노래' },
-    { term: '조율이시', gloss: '대추·밤·배·감 순으로 놓기' },
+    { term: '조율이시', gloss: '과일 순서를 설명하는 말, 필수 규칙은 아님' },
     { term: '어동육서', gloss: '생선은 동쪽, 고기는 서쪽' },
     { term: '선후창', gloss: '앞소리를 메기면 뒷소리를 받는 방식' },
     { term: '벌초', gloss: '산소의 풀을 베어 정리하는 일' },
@@ -84,20 +84,19 @@ export const SONGPYEON = {
 /* ─────────────── 차례상 차리기 ─────────────── */
 
 export const CHARYE = {
-  rule: '조율이시 — 대추, 밤, 배, 감 순서로 놓습니다',
+  rule: '조율이시 — 과일 순서를 설명하는 한 가지 말입니다',
   why:
-    '대추는 씨가 하나라 임금을, 밤은 세 톨이라 삼정승을, 배는 씨가 여섯이라 육조를, ' +
-    '감은 여덟이라 팔도 관찰사를 뜻한다는 풀이가 전해집니다. ' +
-    '다만 문헌마다 다르고 집집마다 달라서, 이것만이 정답인 것은 아니에요.',
+    '대추·밤·배·감 순서로 놓는다는 말이지만 필수 예법은 아닙니다. ' +
+    '집집마다 과일의 종류와 놓는 방식이 다를 수 있어요.',
   items: [
-    { id: 'jujube',    name: '대추', emoji: '🔴', order: 1, seeds: '씨가 하나' },
-    { id: 'chestnut',  name: '밤',   emoji: '🌰', order: 2, seeds: '세 톨' },
-    { id: 'pear',      name: '배',   emoji: '🍐', order: 3, seeds: '씨가 여섯' },
-    { id: 'persimmon', name: '감',   emoji: '🟠', order: 4, seeds: '씨가 여덟' },
+    { id: 'jujube',    name: '대추', emoji: '🔴', order: 1 },
+    { id: 'chestnut',  name: '밤',   emoji: '🌰', order: 2 },
+    { id: 'pear',      name: '배',   emoji: '🍐', order: 3 },
+    { id: 'persimmon', name: '감',   emoji: '🟠', order: 4 },
   ],
   extra: {
-    rule: '홍동백서 — 붉은 과일은 동쪽, 흰 과일은 서쪽',
-    note: '동쪽이 오른편, 서쪽이 왼편입니다.',
+    rule: '홍동백서 — 과일 배치를 설명하는 한 가지 말입니다',
+    note: '필수 규칙이 아니므로 가족이 정한 방식으로 놓을 수 있어요.',
   },
 };
 
