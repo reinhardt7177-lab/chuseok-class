@@ -27,16 +27,13 @@ app.use(express.json({ limit: '256kb' }));
 /**
  * 정적 파일.
  *
- * 그림은 한 번 만들면 안 바뀌므로 오래 담아 둔다.
- * 반대로 html·css·js를 담아 두면, 고쳐 올려도 선생님 화면에는
- * 최대 한 시간 동안 옛 화면이 그대로 남는다. 그래서 그쪽은
- * 매번 서버에 물어보게 하고, 안 바뀌었으면 304로 짧게 끝낸다.
+ * 이미지도 같은 파일명으로 교체할 수 있으므로 매번 갱신 여부를 확인한다.
+ * 안 바뀐 파일은 ETag로 304 응답을 받는다.
  */
 app.use(express.static(path.join(ROOT, 'public'), {
   etag: true,
-  setHeaders(res, filePath) {
-    const code = /\.(html|css|js)$/i.test(filePath);
-    res.setHeader('cache-control', code ? 'no-cache' : 'public, max-age=604800');
+  setHeaders(res) {
+    res.setHeader('cache-control', 'no-cache');
   },
 }));
 

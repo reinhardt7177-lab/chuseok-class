@@ -4,6 +4,7 @@
  */
 
 import { ASSET_BY_ID } from './assets.js';
+import { artUrl } from './asset-url.js';
 
 /** 파티클 종류별 개수와 크기 — 너무 많으면 저사양 교실 PC가 버벅인다 */
 const FX_SPEC = {
@@ -65,7 +66,7 @@ export function renderStage(host, assetId, opts = {}) {
 
   const img = document.createElement('img');
   img.className = `stage__img motion-${motion}`;
-  img.src = `assets/img/${assetId}.jpg`;
+  img.src = artUrl(`assets/img/${assetId}.jpg`);
   img.alt = ''; // 배경 장식 — 내용은 본문이 전달한다
   img.setAttribute('aria-hidden', 'true');
   img.decoding = 'async';
@@ -92,6 +93,6 @@ export function preload(assetIds) {
   for (const id of assetIds) {
     const img = new Image();
     img.decoding = 'async';
-    img.src = `assets/img/${id}.jpg`;
+    img.src = artUrl(`assets/img/${id}.jpg`);
   }
 }

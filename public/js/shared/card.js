@@ -6,6 +6,8 @@
  * 패들릿 카드와 휴대폰 화면 모두에서 잘 보이는 비율.
  */
 
+import { artUrl } from './asset-url.js';
+
 const W = 1080;
 const H_MAX = 1350;   // 4:5 — 이보다 길어지지 않는다
 const H_MIN = 860;    // 내용이 적어도 카드 꼴은 갖추게
@@ -109,6 +111,43 @@ function backdrop(ctx, H) {
 /* ═══════════════ 소원 엽서 ═══════════════ */
 
 const PC = { W: 1480, H: 1000 };   // 148×100mm — 진짜 엽서 비율
+let postcardArtPromise;
+
+function postcardArt() {
+  postcardArtPromise ??= new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = artUrl('assets/img/postcard-art.jpg');
+  });
+  return postcardArtPromise;
+}
+
+/** 어절을 살려 줄바꿈하되, 폭보다 긴 단어만 글자 단위로 나눈다. */
+function wrapPostcard(ctx, value, maxWidth) {
+  const lines = [];
+  for (const paragraph of String(value).replace(/\r/g, '').split('\n')) {
+    let line = '';
+    for (const word of paragraph.trim().split(/\s+/).filter(Boolean)) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (ctx.measureText(candidate).width <= maxWidth) {
+        line = candidate;
+        continue;
+      }
+      if (line) lines.push(line);
+      line = '';
+      for (const char of word) {
+        if (line && ctx.measureText(line + char).width > maxWidth) {
+          lines.push(line);
+          line = '';
+        }
+        line += char;
+      }
+    }
+    if (line) lines.push(line);
+  }
+  return lines;
+}
 
 /** 보름달 — 달무리, 바다 자국, 방아 찧는 토끼 */
 function fullMoon(ctx, cx, cy, r) {
@@ -283,132 +322,101 @@ function seal(ctx, x, y, s, text) {
  *
  * @param {object} spec { kind, name, title, notes:[{label,text}], note }
  */
-function paintPostcard(ctx, spec) {
+function paintPostcard(ctx, spec, art) {
   const { W: PW, H: PH } = PC;
-
-  /* 밤하늘 */
-  const sky = ctx.createLinearGradient(0, 0, PW * .4, PH);
-  sky.addColorStop(0, '#0b0e16');
-  sky.addColorStop(.5, '#182033');
-  sky.addColorStop(1, '#0c1019');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, PW, PH);
-
-  /* 별 — 자리를 고정해 늘 같은 하늘이 나오게 */
-  let seed = 19;
-  const next = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-  ctx.fillStyle = 'rgba(246,236,210,.6)';
-  for (let i = 0; i < 70; i += 1) {
-    const x = next() * PW;
-    const y = next() * PH;
-    const r = .7 + next() * 1.8;
-    ctx.globalAlpha = .2 + next() * .55;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-
-  const SPLIT = 940;
-
-  fullMoon(ctx, 1195, 520, 150);
-  skyline(ctx, PW, PH);
-  stamp(ctx, PW - 196, 62, 136, 162);
-
-  /* 엽서 테두리 — 금빛 두 줄 */
-  ctx.strokeStyle = 'rgba(242,201,107,.55)';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(26, 26, PW - 52, PH - 52);
-  ctx.strokeStyle = 'rgba(242,201,107,.22)';
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(38, 38, PW - 76, PH - 76);
-
-  /* 가운데 점선 */
-  ctx.save();
-  ctx.strokeStyle = 'rgba(246,236,210,.22)';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([9, 12]);
-  ctx.beginPath();
-  ctx.moveTo(SPLIT, 92);
-  ctx.lineTo(SPLIT, PH - 92);
-  ctx.stroke();
-  ctx.restore();
-
-  /* 제목 — 소원성취 */
-  const PAD = 84;
-  ctx.fillStyle = C.gold;
-  ctx.font = body(25);
-  ctx.fillText(`추석 계기교육 · ${spec.lead ?? '보름달에 빈 소원'}`, PAD, 118);
-
-  ctx.fillStyle = C.moon;
-  ctx.font = title(98);
-  ctx.fillText('소원성취', PAD, 226);
-  /* 낙관은 글씨 폭을 재서 그 뒤에 찍는다 — 글꼴이 바뀌어도 겹치지 않게 */
-  const titleW = ctx.measureText('소원성취').width;
-
-  ctx.strokeStyle = 'rgba(242,201,107,.5)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(PAD, 258);
-  ctx.lineTo(PAD + 330, 258);
-  ctx.stroke();
-
-  /* 소원들 — 길면 글자를 줄인다 */
-  const boxW = SPLIT - PAD - 58;
+  const left = 82;
+  const textWidth = 710;
+  const personal = spec.kind === '추석엽서';
+  const heading = personal ? '달빛에 띄우는 편지'
+    : spec.kind === '배움엽서' ? '오늘의 추석 이야기' : '보름달에 빈 소원';
   const notes = (spec.notes ?? []).filter((n) => n?.text);
-  const total = notes.reduce((n, x) => n + x.text.length, 0);
-  const size = total > 120 ? 31 : total > 70 ? 36 : 41;
+  const blocks = personal
+    ? [{ label: '', text: notes[0]?.text ?? '' }]
+    : notes;
 
-  let y = 334;
-  for (const n of notes) {
-    ctx.fillStyle = C.gold;
-    ctx.font = body(26);
-    ctx.fillText(`▸ ${n.label}`, PAD, y);
-    y += 46;
+  ctx.fillStyle = '#fff7e9';
+  ctx.fillRect(0, 0, PW, PH);
+  if (art) ctx.drawImage(art, 0, 0, PW, PH);
 
-    ctx.fillStyle = C.moon;
-    ctx.font = body(size);
-    for (const line of wrap(ctx, n.text, boxW)) {
-      if (y > PH - 200) break;
-      ctx.fillText(line, PAD + 6, y);
-      y += size * 1.5;
-    }
-    y += 34;
-  }
+  /* 인쇄 테두리와 윗머리 */
+  ctx.strokeStyle = 'rgba(115,80,44,.42)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(25, 25, PW - 50, PH - 50);
+  ctx.strokeStyle = 'rgba(115,80,44,.2)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(36, 36, PW - 72, PH - 72);
 
-  /* 꼬리 — 보낸 사람과 날짜 */
-  ctx.strokeStyle = C.line;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(PAD, PH - 150);
-  ctx.lineTo(SPLIT - 58, PH - 150);
-  ctx.stroke();
-
-  ctx.fillStyle = C.moonDim;
+  ctx.fillStyle = '#aa6338';
   ctx.font = body(23);
-  ctx.fillText('보낸 사람', PAD, PH - 110);
+  ctx.fillText('한가위 · 마음을 담은 엽서', left, 105);
+  ctx.fillStyle = '#24364a';
+  ctx.font = title(62);
+  ctx.fillText(heading, left, 194, textWidth);
+  ctx.fillStyle = '#c57d4e';
+  ctx.fillRect(left, 222, 190, 3);
 
-  ctx.fillStyle = C.moon;
-  ctx.font = title(40);
-  ctx.fillText(spec.name || '', PAD + 110, PH - 106);
-
-  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-  ctx.fillStyle = C.moonDim;
-  ctx.font = body(24);
-  ctx.fillText(today, PAD, PH - 66);
-
-  seal(ctx, PAD + titleW + 26, 150, 76, '소원성취');
-
-  /* 오른쪽 아래 한마디 */
-  if (spec.note) {
-    ctx.fillStyle = 'rgba(246,236,210,.5)';
-    ctx.font = body(21);
-    ctx.textAlign = 'center';
-    for (const [i, line] of wrap(ctx, spec.note, 430).slice(0, 3).entries()) {
-      ctx.fillText(line, 1195, PH - 128 + i * 32);
-    }
-    ctx.textAlign = 'left';
+  if (personal) {
+    ctx.fillStyle = '#a46238';
+    ctx.font = body(23);
+    ctx.fillText('받는 사람', left, 277);
+    ctx.fillStyle = '#24364a';
+    ctx.font = title(36);
+    ctx.fillText(spec.lead ?? '', left + 118, 280, textWidth - 118);
+    ctx.fillStyle = '#a46238';
+    ctx.font = body(25);
+    ctx.fillText(notes[0]?.label ?? '', left, 345, textWidth);
   }
+
+  const bodyTop = personal ? 407 : 305;
+  const bodyBottom = 808;
+  let fontSize = 39;
+  let laidOut = [];
+  for (; fontSize >= 19; fontSize -= 1) {
+    ctx.font = body(fontSize);
+    laidOut = blocks.map((block) => ({
+      label: block.label,
+      lines: wrapPostcard(ctx, block.text, textWidth),
+    }));
+    const height = laidOut.reduce((sum, block) =>
+      sum + (block.label ? 39 : 0) + block.lines.length * fontSize * 1.4 + 17, 0);
+    if (height <= bodyBottom - bodyTop) break;
+  }
+  fontSize = Math.max(19, fontSize);
+  let y = bodyTop;
+  for (const block of laidOut) {
+    if (block.label) {
+      ctx.fillStyle = '#a46238';
+      ctx.font = body(22);
+      ctx.fillText(block.label, left, y);
+      y += 38;
+    }
+    ctx.fillStyle = '#263240';
+    ctx.font = body(fontSize);
+    for (const line of block.lines) {
+      ctx.fillText(line, left, y, textWidth);
+      y += fontSize * 1.4;
+    }
+    y += 17;
+  }
+
+  /* 서명과 날짜 — 실제 편지처럼 본문 아래에 둔다 */
+  ctx.strokeStyle = 'rgba(115,80,44,.3)';
+  ctx.beginPath();
+  ctx.moveTo(left, 843);
+  ctx.lineTo(left + textWidth, 843);
+  ctx.stroke();
+  ctx.fillStyle = '#725a4d';
+  ctx.font = body(23);
+  ctx.fillText('보낸 사람', left, 894);
+  ctx.fillStyle = '#24364a';
+  ctx.font = title(34);
+  ctx.fillText(spec.name ?? '', left + 120, 897, 315);
+  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  ctx.fillStyle = '#725a4d';
+  ctx.font = body(22);
+  ctx.textAlign = 'right';
+  ctx.fillText(today, left + textWidth, 894);
+  ctx.textAlign = 'left';
 }
 
 /**
@@ -428,7 +436,7 @@ export async function drawCard(spec) {
     const cv = document.createElement('canvas');
     cv.width = PC.W;
     cv.height = PC.H;
-    paintPostcard(cv.getContext('2d'), spec);
+    paintPostcard(cv.getContext('2d'), spec, await postcardArt());
     return cv;
   }
 

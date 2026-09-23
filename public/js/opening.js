@@ -9,6 +9,7 @@
 import { HOLIDAYS, HERO } from './data/holidays.js';
 import { renderStage, preload } from './shared/stage.js';
 import { mountBgm } from './shared/bgm.js';
+import { artUrl } from './shared/asset-url.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -21,7 +22,7 @@ hero.className = 'hero';
 hero.href = 'teacher.html';
 hero.setAttribute('aria-label', `${HERO.name} 수업 시작하기`);
 hero.innerHTML = `
-  <span class="hero__bg" style="background-image:url('${HERO.img}')"></span>
+  <span class="hero__bg" style="background-image:url('${artUrl(HERO.img)}')"></span>
   <span class="hero__today">${esc(HERO.tag)}</span>
   <span class="hero__main">
     <h2 class="hero__name"><em>${esc(HERO.when)}</em>${esc(HERO.name)}</h2>
@@ -42,7 +43,7 @@ for (const h of HOLIDAYS) {
   tile.innerHTML = `
     <span class="tile__in">
       <span class="tile__face tile__front">
-        <span class="tile__bg" style="background-image:url('${h.img}')${h.pos ? `;background-position:${h.pos}` : ''}"></span>
+        <span class="tile__bg" style="background-image:url('${artUrl(h.img)}')${h.pos ? `;background-position:${h.pos}` : ''}"></span>
         <span class="tile__cap">
           <span class="tile__name">${esc(h.name)}</span>
           <span class="tile__when">${esc(h.when)}</span>

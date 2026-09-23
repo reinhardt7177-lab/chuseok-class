@@ -9,7 +9,8 @@
 import { POSTCARD, WORD_CARDS, SONGPYEON, GANGGANG, DISCUSS, WISH } from './data/activities.js';
 import { ROWS, ALL_SLOTS, LESSON as CHARYE_LESSON } from './data/charye-table.js';
 import { REFLECTION } from './data/quiz.js';
-import { attachSaveButton } from './shared/card.js';
+import { attachSaveButton, drawCard } from './shared/card.js';
+import { artUrl } from './shared/asset-url.js';
 
 const shuffle = (arr) => arr.map((v) => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(([, v]) => v);
 
@@ -165,7 +166,7 @@ function songpyeon(host, ctx) {
       <div class="progress" id="spBar"></div>
 
       <div class="sp__stage" id="spStage">
-        <img class="sp__img" id="spImg" src="assets/items/songpyeon-white.png" alt="반죽">
+        <img class="sp__img" id="spImg" src="${artUrl('assets/items/songpyeon-white.png')}" alt="반죽">
         <span class="sp__fill" id="spFill"></span>
         <div class="sp__steam" id="spSteam"></div>
         <div class="sp__hintring" id="spRing"></div>
@@ -227,7 +228,7 @@ function songpyeon(host, ctx) {
       <div class="sp__opts">
         ${DOUGH.map((o) => `
           <button class="sp__opt sp__opt--pic" data-id="${o.id}">
-            <img src="assets/items/songpyeon-${o.id}.png" alt="">
+            <img src="${artUrl(`assets/items/songpyeon-${o.id}.png`)}" alt="">
             <b>${ctx.esc(o.label)}</b>
           </button>`).join('')}
       </div>`;
@@ -236,7 +237,7 @@ function songpyeon(host, ctx) {
       const btn = e.target.closest('[data-id]');
       if (!btn) return;
       chosen.dough = DOUGH.find((o) => o.id === btn.dataset.id);
-      img.src = `assets/items/songpyeon-${chosen.dough.id}.png`;
+      img.src = artUrl(`assets/items/songpyeon-${chosen.dough.id}.png`);
       blip(520);
       say(chosen.dough.note);
       setTimeout(knead, 900);
@@ -385,15 +386,15 @@ function songpyeon(host, ctx) {
       panel.innerHTML = `
         <div class="sp__opts">
           <button class="sp__opt sp__opt--pic" data-s="full">
-            <img src="assets/items/songpyeon-full.png" alt=""><b>보름달</b></button>
+            <img src="${artUrl('assets/items/songpyeon-full.png')}" alt=""><b>보름달</b></button>
           <button class="sp__opt sp__opt--pic" data-s="star">
-            <img src="assets/items/songpyeon-star.png" alt=""><b>별</b></button>
+            <img src="${artUrl('assets/items/songpyeon-star.png')}" alt=""><b>별</b></button>
         </div>`;
       panel.onclick = (e) => {
         const b = e.target.closest('[data-s]');
         if (!b) return;
         chosen.shape = b.dataset.s;
-        img.src = `assets/items/${picture()}.png`;
+        img.src = artUrl(`assets/items/${picture()}.png`);
         blip(430);
         say(b.dataset.s === 'full'
           ? '보름달은 이미 다 찬 달이라, 전통 송편은 반달로 빚어요.'
@@ -409,7 +410,7 @@ function songpyeon(host, ctx) {
     hint.textContent = '찜기에 무엇을 깔까요?';
     why.innerHTML = '';
     stageEl.className = 'sp__stage';
-    img.src = `assets/items/${picture()}.png`;
+    img.src = artUrl(`assets/items/${picture()}.png`);
 
     const opts = SONGPYEON.steps.find((s) => s.id === 'steam').options;
     panel.innerHTML = `
@@ -446,7 +447,7 @@ function songpyeon(host, ctx) {
       <div class="act__head"><h2>🥟 송편이 완성됐어요</h2></div>
 
       <div class="sp__stage sp__stage--big">
-        <img class="sp__img" src="assets/items/${picture()}.png" alt="완성된 송편">
+        <img class="sp__img" src="${artUrl(`assets/items/${picture()}.png`)}" alt="완성된 송편">
         <span class="sp__fill">${chosen.filling?.emoji ?? ''}</span>
       </div>
 
@@ -551,7 +552,7 @@ function charye(host, ctx) {
       slot.classList.toggle('has', !!it);
       slot.classList.toggle('picked-target', !!picked && !it);
       slot.innerHTML = it
-        ? `<img src="assets/items/${it.id}.png" alt="${ctx.esc(it.name)}" draggable="false">
+        ? `<img src="${artUrl(`assets/items/${it.id}.png`)}" alt="${ctx.esc(it.name)}" draggable="false">
            <b>${ctx.esc(it.name)}</b>`
         : '<span class="ct__mark"></span>';
     }
@@ -560,7 +561,7 @@ function charye(host, ctx) {
     tray.innerHTML = pool.map((it) => `
       <button class="ct__item ${used.has(it.key) ? 'used' : ''} ${picked === it ? 'picked' : ''}"
               data-key="${it.key}" ${used.has(it.key) ? 'disabled' : ''}>
-        <img src="assets/items/${it.id}.png" alt="" draggable="false">
+        <img src="${artUrl(`assets/items/${it.id}.png`)}" alt="" draggable="false">
         <b>${ctx.esc(it.name)}</b>
       </button>`).join('');
   }
@@ -672,7 +673,7 @@ function charye(host, ctx) {
       <div class="ct__why">
         ${ALL_SLOTS.map((f) => `
           <div class="ct__whyrow">
-            <img src="assets/items/${f.id}.png" alt="">
+            <img src="${artUrl(`assets/items/${f.id}.png`)}" alt="">
             <div><b>${f.row}열 · ${ctx.esc(f.name)}</b><span>${ctx.esc(f.why)}</span></div>
           </div>`).join('')}
       </div>
@@ -754,7 +755,7 @@ function ganggangsullae(host, ctx) {
 
   ring.innerHTML = Array.from({ length: DANCERS }, (_, i) =>
     `<span class="gg__dancer" style="--a:${STEP * i}deg">
-       <img src="assets/items/dancer-${WEAR[i % WEAR.length]}.png" alt="" draggable="false">
+       <img src="${artUrl(`assets/items/dancer-${WEAR[i % WEAR.length]}.png`)}" alt="" draggable="false">
      </span>`).join('');
   const dancers = [...ring.querySelectorAll('.gg__dancer')];
 
@@ -1204,8 +1205,21 @@ function postcard(host, ctx) {
     const text = ta.value.trim();
     if (!text) { ta.focus(); return; }
 
+    const spec = {
+      style: 'postcard',
+      kind: '추석엽서', name: ctx.name,
+      lead: to.label,
+      notes: [{ label: greeting, text }],
+    };
+    $$('#pcDone').disabled = true;
+
     /* 엽서도 생각쓰기와 같은 자리에 모은다 — 선생님이 한 곳에서 본다 */
-    await ctx.api.reflection(`${to.label} — ${greeting}`, text);
+    try {
+      await ctx.api.reflection(`${to.label} — ${greeting}`, text);
+    } catch {
+      $$('#pcDone').disabled = false;
+      return;
+    }
 
     $$('#pcResult').innerHTML = `
       <div class="act__done">
@@ -1215,18 +1229,14 @@ function postcard(host, ctx) {
           아래에서 엽서로 저장한 뒤<br>패들릿에 올리거나 직접 전해 주세요.
         </p>
       </div>`;
-    $$('#pcDone').disabled = true;
+    const preview = await drawCard(spec);
+    preview.className = 'pc__preview';
+    preview.setAttribute('role', 'img');
+    preview.setAttribute('aria-label', `${to.label} 보내는 추석 엽서 미리보기`);
+    $$('#pcResult').appendChild(preview);
 
     if (!host.querySelector('.save-card')) {
-      attachSaveButton(host.querySelector('#pcResult'), () => ({
-        style: 'postcard',
-        kind: '추석엽서', name: ctx.name,
-        lead: to.label,
-        notes: [
-          { label: greeting, text },
-        ],
-        note: '더도 말고 덜도 말고 한가위만 같아라.',
-      }), '엽서로 저장하기');
+      attachSaveButton(host.querySelector('#pcResult'), () => spec, '엽서로 저장하기');
     }
   };
 }

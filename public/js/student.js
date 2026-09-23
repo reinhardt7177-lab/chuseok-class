@@ -10,6 +10,7 @@ import { renderStage } from './shared/stage.js';
 import { ACTIVITIES } from './activities.js';
 import { quizFor, titleFor } from './data/quiz.js';
 import { hasServer } from './shared/offline.js';
+import { artUrl } from './shared/asset-url.js';
 
 /** 퀴즈 보기 색·기호 — 교사 화면과 반드시 같아야 한다 */
 const CHOICE = [
@@ -431,7 +432,7 @@ function renderReading(section, view) {
         <div class="gallery">
           ${extras.map((a) => `
             <figure>
-              <img src="assets/img/${a.id}.jpg" alt="${esc(a.scene)}" loading="lazy">
+              <img src="${artUrl(`assets/img/${a.id}.jpg`)}" alt="${esc(a.scene)}" loading="lazy">
               <figcaption>${esc(a.scene)}</figcaption>
             </figure>`).join('')}
         </div>` : ''}
