@@ -681,8 +681,12 @@ document.addEventListener('click', (e) => {
   if (card) return chooseBand(card.dataset.band);
 
   const dot = e.target.closest('[data-beat]');
-  if (dot) { state.beat = Number(dot.dataset.beat); return paint(); }
+  if (dot) {
+    state.beat = Number(dot.dataset.beat);
+    paint();
     pushState();
+    return;
+  }
 
   const go = e.target.closest('[data-go]');
   if (go) return goto(Number(go.dataset.go));

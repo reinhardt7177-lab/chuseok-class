@@ -203,6 +203,7 @@ function apply(view) {
   if (view.sectionId === 'student' || (view.activityOpen && !SECTION_BY_ID[view.sectionId])) {
     /* 활동을 하고 있는 중이면 건드리지 않는다 */
     if (renderedKey !== 'menu' && !String(renderedKey).startsWith('act:')) renderMenu(view);
+    if (renderedKey === 'act:moon-wish') updateWall(view);
     return;
   }
 
