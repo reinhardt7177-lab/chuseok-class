@@ -18,6 +18,8 @@ import {
   openRoom, roomByKey, roomByCode, roomByStudent,
   joinRoom, closeRoom, sweep, roomCount,
 } from './rooms.js';
+import { staticOptions } from './static-cache.js';
+import { assetHost } from './asset-host.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT ?? 8088);
@@ -33,17 +35,19 @@ app.get('/healthz', (req, res) => res.type('text').send('ok'));
 
 app.use(express.json({ limit: '256kb' }));
 /**
+ * 그림·음악 — Render에서는 GitHub Pages로 돌려보낸다.
+ * 이 서버가 내보낸 데이터가 한 달 266GB(약 $39)가 된 적이 있다. 자세한 사정은 asset-host.js.
+ * 교실 PC(npm start)에서는 꺼져 있고, 아래 정적 파일이 직접 준다.
+ */
+app.use(assetHost({ publicDir: path.join(ROOT, 'public') }));
+
+/**
  * 정적 파일.
  *
- * 이미지도 같은 파일명으로 교체할 수 있으므로 매번 갱신 여부를 확인한다.
- * 안 바뀐 파일은 ETag로 304 응답을 받는다.
+ * ETag를 파일 '내용'으로 만들어서, 배포를 해도 안 바뀐 파일은 브라우저가 다시 받지 않는다.
+ * 그림·음악은 Render에서 한동안 묻지도 않게 한다. 규칙은 static-cache.js 에 있다.
  */
-app.use(express.static(path.join(ROOT, 'public'), {
-  etag: true,
-  setHeaders(res) {
-    res.setHeader('cache-control', 'no-cache');
-  },
-}));
+app.use(express.static(path.join(ROOT, 'public'), staticOptions()));
 
 /* 한 시간에 한 번 빈 방을 치운다 */
 setInterval(sweep, 60 * 60 * 1000).unref();

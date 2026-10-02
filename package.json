@@ -14,7 +14,8 @@
     "models": "node scripts/list-models.js",
     "assets": "node scripts/generate-assets.js",
     "assets:dry": "node scripts/generate-assets.js --dry-run",
-    "deploy:render": "node scripts/deploy-render.js"
+    "deploy:render": "node scripts/deploy-render.js",
+    "deploy:check": "node scripts/deploy-render.js --check"
   },
   "dependencies": {
     "express": "^4.21.2",

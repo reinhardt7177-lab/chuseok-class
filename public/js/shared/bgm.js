@@ -35,6 +35,13 @@ export function mountBgm(host, { before = null, src = 'assets/audio/bgm.mp3', vo
     audio.hidden = true;
     document.body.append(audio);
 
+    /* 음악을 다른 주소(GitHub Pages)에서 받아 오는 배포판에서 그쪽이 안 열리면, 이 서버에서 직접 한 번 더 받는다 */
+    audio.addEventListener('error', () => {
+      if (/[?&]local=/.test(audio.getAttribute('src') ?? '')) return;
+      audio.src = `${src}${src.includes('?') ? '&' : '?'}local=1`;
+      if (wanted && !held) play();
+    });
+
     try { wanted = localStorage.getItem(KEY) !== 'off'; } catch { /* 사생활 보호 창 */ }
 
     /* 첫 손짓에 시작. 한 번 시작되면 그 뒤로는 이 리스너가 할 일이 없다. */

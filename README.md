@@ -170,15 +170,66 @@ A반에서 연 퀴즈는 A반 학생 화면에만 뜨고, 명단도 소원도 �
 
 저장소 **Settings → Pages → Source** 를 **GitHub Actions** 로 한 번만 바꿔 주세요.
 
+Pages 는 push 할 때마다 **자동으로** 바뀝니다. (Render 는 그렇지 않습니다 — 아래 참고.)
+
 ### Render — 실시간 기능까지
 
-이미 <https://chuseok-class.onrender.com> 에 올라가 있습니다. `main`에 밀어 넣으면 알아서 다시 배포됩니다.
+<https://chuseok-class.onrender.com> 에 올라가 있습니다.
 
-직접 올릴 때는 두 가지 길이 있습니다.
+**자동 배포는 꺼져 있습니다.** `main`에 push해도 Render는 그대로이고(GitHub Pages만 바뀝니다),
+Render에 올리려면 직접 `npm run deploy:render` 를 돌립니다. 까닭은 아래 두 절에 있습니다.
+
+올리는 길은 두 가지입니다.
 [`render.yaml`](render.yaml)이 들어 있으니 대시보드에서 **New → Blueprint** 로 이 저장소를 고르면 되고,
 대시보드에 들어가기 싫으면 API 키를 `.env`에 넣고 `npm run deploy:render` 를 돌리면 됩니다.
 `LEONARDO_API_KEY`는 넣지 않아도 됩니다. 삽화가 이미 저장소에 들어 있어서
 수업 중에는 Leonardo를 부르지 않습니다.
+
+### 수업 시간에는 올리지 않는다
+
+Render에 올리면(배포하면) 서버가 다시 켜집니다. 방은 메모리에만 있으므로 **열려 있던 수업방이 모두 사라지고**
+학생은 새 코드로 다시 들어와야 합니다. 그래서 **평일 한국 시간 08:30~15:00 에는 올리지 않습니다.**
+
+```
+npm run deploy:check            # 지금 올려도 되는 시간인지만 본다 (키도 인터넷도 필요 없음)
+npm run deploy:render           # 올린다 — 수업 시간대에 돌리면 거절한다
+npm run deploy:render -- --now  # 수업 시간 규칙을 알고도 올린다 (지금 올리라고 정했을 때만)
+```
+
+공휴일·방학은 따로 따지지 않습니다. 쉬는 평일에 막히면 `--now` 를 주면 됩니다.
+시각 기준은 [`scripts/class-hours.js`](scripts/class-hours.js) 한 곳입니다.
+
+### 요금 — 그림·음악은 GitHub Pages에서 내려받는다
+
+Render는 한 달 **5GB까지 대역폭이 무료**이고 넘으면 GB당 $0.15 입니다. 학급 하나(교사 1 + 학생 25)가
+그림·음악으로 약 383MB를 받습니다. 2026-09-23(추석 연휴 전 마지막 수업일)에 전국 학급이 한꺼번에 써서
+이 서버가 하루 238GB를 내보냈고 약 $39 가 청구됐습니다. 그날 수업 시간에 배포가 15번 있었던 것도 보탰습니다 —
+예전에는 배포마다 파일 버전표(ETag)가 바뀌어서, 접속 중이던 기기가 이미 본 그림도 처음부터 다시 받았습니다.
+
+그래서 두 가지를 바꿨습니다.
+
+1. **그림·음악은 이 서버가 내보내지 않습니다.** `/assets/…` 요청을 같은 경로의 GitHub Pages 로 돌려보냅니다
+   ([`server/asset-host.js`](server/asset-host.js)). Render 에서만 켜지고, 교실 PC `npm start` 는 직접 줍니다.
+   - 환경변수 `ASSET_BASE` 로 다른 곳(예: Cloudflare Pages)을 가리킬 수 있습니다. 빈 값(`ASSET_BASE=`)이면 끕니다.
+   - Render 가 내보내는 것은 HTML·JS·CSS·API 뿐이라 학급 하나에 약 7MB 입니다 (예전 약 383MB — 빈 브라우저로 장면을 끝까지 넘기며 직접 잰 값).
+2. **파일 버전표(ETag)를 파일 내용으로 만듭니다** ([`server/static-cache.js`](server/static-cache.js)).
+   배포해도 안 바뀐 파일은 브라우저가 다시 받지 않습니다. 그림·음악은 Render 에서 한 시간 동안 묻지도 않습니다.
+
+**Pages 가 안 열릴 때** 그림이 모두 깨지지 않게 길을 두 개 두었습니다.
+
+- 서버가 2분마다(안 열릴 땐 30초마다) Pages 를 들여다보고, 안 열리면 그동안은 Render 가 직접 내보냅니다.
+  대역폭이 다시 들지만 수업이 끊기는 것보다 낫습니다. 로그에 `⚠️ … 직접 내보냅니다` 가 남습니다.
+- 학생·교사 화면도 그림이 안 뜨면 같은 주소에 `?local=1` 을 붙여 **한 번 다시** 받습니다
+  ([`public/js/shared/asset-fallback.js`](public/js/shared/asset-fallback.js)). 학교 망이 github.io 를 막았거나
+  Pages 가 한 기기에 요청을 거절할 때도 그림이 나옵니다.
+
+GitHub Pages 에는 월 100GB 쯤의 권장 한도가 있습니다(넘으면 안내 메일이나 제한이 올 수 있고, 요금은 없습니다).
+한도를 넘어 Pages 가 막히면 위 길로 Render 가 직접 내보내므로 **수업은 계속되지만 Render 요금이 다시 듭니다.**
+전국 학급이 몰리는 날이 또 온다면 Cloudflare Pages(대역폭 무제한, 계정 필요)로 옮기세요.
+그림을 올리고 `ASSET_BASE` 값 하나만 바꾸면 됩니다.
+
+그림을 **같은 파일 이름으로 바꿨다면** `public/js/shared/asset-url.js` 의 `ART_VERSION` 을 올려 주세요.
+이미 받아 간 기기가 새 그림을 바로 받습니다. 새 그림은 push 해서 Pages 배포(약 1분)가 끝나야 Render 판에서도 보입니다.
 
 ### 잠드는 것 다루기
 

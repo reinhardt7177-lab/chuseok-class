@@ -1,6 +1,13 @@
 /**
  * Render에 이 앱을 올린다.
- *   node scripts/deploy-render.js
+ *   npm run deploy:render              올린다 (평일 08:30~15:00 한국 시간에는 거절한다)
+ *   npm run deploy:check               지금 올려도 되는 시간인지만 본다 (키도, 인터넷도 필요 없다)
+ *   npm run deploy:render -- --now     수업 시간 규칙을 알고도 건너뛴다 — 선생님이 지금 올리라고 했을 때만
+ *
+ * Render의 자동 배포는 꺼져 있다(2026-10-02). `main`에 push해도 Render는 그대로이고,
+ * 올리는 길은 이 스크립트(또는 대시보드의 Manual Deploy)뿐이다.
+ * 이유: 2026-09-23 수업 시간(08:45~12:46)에 push가 15번 있었고 그만큼 서버가 재시작되어
+ * 열려 있던 수업방이 사라졌으며, 접속 중인 학생 기기가 파일을 다시 받아 대역폭 요금이 났다.
  *
  * .env 의 RENDER_API_KEY 를 쓴다. 키는 어디에도 찍지 않는다.
  *
@@ -12,6 +19,29 @@
  * 끝내고 싶을 때 쓰는 길이다.
  */
 import 'dotenv/config';
+import { inClassHours, describeKst } from './class-hours.js';
+
+const FORCE = process.argv.includes('--now');
+const CHECK = process.argv.includes('--check');
+
+/* ── 수업 시간에는 올리지 않는다. API 키보다 먼저 본다 — --check 는 키 없이도 돈다. ── */
+if (inClassHours() && !FORCE) {
+  console.error(`\n  수업 시간에는 올리지 않습니다 — 지금은 ${describeKst()}`);
+  console.error('  평일 08:30~15:00 에 올리면');
+  console.error('    · 서버가 다시 켜져 열려 있는 수업방이 모두 사라집니다 (학생이 새 코드로 다시 들어와야 합니다)');
+  console.error('    · 접속 중인 기기가 파일을 다시 받아 대역폭 요금이 듭니다 (2026-09-23 약 $40 청구의 한 원인)');
+  console.error('  15:00 이후에 다시 실행하세요. 지금 꼭 올려야 한다면:\n');
+  console.error('      npm run deploy:render -- --now\n');
+  process.exit(2);
+}
+if (CHECK) {
+  const note = FORCE && inClassHours() ? ' (--now 로 수업 시간 규칙을 건너뜀)' : '';
+  console.log(`\n  올려도 되는 시간입니다 — ${describeKst()}${note}\n`);
+  process.exit(0);
+}
+if (FORCE && inClassHours()) {
+  console.log(`\n  ⚠️  수업 시간(${describeKst()})인데 --now 로 올립니다. 열려 있는 수업방이 사라집니다.`);
+}
 
 const KEY = process.env.RENDER_API_KEY;
 const REPO = process.env.RENDER_REPO ?? 'https://github.com/reinhardt7177-lab/chuseok-class';
@@ -22,7 +52,7 @@ const REGION = 'singapore';
 if (!KEY) {
   console.error('\n  RENDER_API_KEY 가 없습니다.');
   console.error('  Render → Account Settings → API Keys → Create API Key 로 만든 키를');
-  console.error('  D:\\mumu\\추석\\.env 에 한 줄 넣어 주세요.\n');
+  console.error('  D:/mumu/추석/.env 에 한 줄 넣어 주세요.\n');
   console.error('      RENDER_API_KEY=rnd_...\n');
   process.exit(1);
 }
@@ -78,7 +108,7 @@ async function main() {
         ownerId: owner.id,
         repo: REPO,
         branch: BRANCH,
-        autoDeploy: 'yes',
+        autoDeploy: 'no',   // push마다 서버가 재시작되지 않게. 올리는 것은 이 스크립트가 한다
         serviceDetails: {
           runtime: 'node',
           plan: 'free',
@@ -120,10 +150,17 @@ async function main() {
 
   const until = Date.now() + 12 * 60 * 1000;
   let last = '';
+  let shown = false;
   while (Date.now() < until) {
     await new Promise((r) => setTimeout(r, 10_000));
     const d = await call(`/services/${service.id}/deploys/${deployId}`);
     const status = (d.deploy ?? d).status;
+    /* 어떤 커밋이 올라가는지 한 번 보여 준다. GitHub에 push하지 않은 커밋은 올라가지 않는다. */
+    if (!shown) {
+      const c = (d.deploy ?? d).commit;
+      if (c?.id) console.log(`  올라가는 커밋  ${c.id.slice(0, 7)} ${String(c.message ?? '').split('\n')[0].slice(0, 60)}`);
+      shown = true;
+    }
     if (status !== last) { console.log(`    ${status}`); last = status; }
     if (status in DONE) {
       const url = (await call(`/services/${service.id}`))?.serviceDetails?.url;

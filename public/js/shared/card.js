@@ -116,8 +116,16 @@ let postcardArtPromise;
 function postcardArt() {
   postcardArtPromise ??= new Promise((resolve) => {
     const img = new Image();
+    /* 그림이 다른 주소(GitHub Pages)에서 와도 캔버스가 '오염'되지 않게 한다.
+       이게 없으면 그리는 건 되는데 PNG로 저장할 때 SecurityError가 난다. */
+    img.crossOrigin = 'anonymous';
+    let again = false;
     img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
+    img.onerror = () => {
+      if (again) return resolve(null);
+      again = true;   // 한 번만 이 서버에서 직접 다시 받는다 (js/shared/asset-fallback.js와 같은 길)
+      img.src = artUrl('assets/img/postcard-art.jpg') + '&local=1';
+    };
     img.src = artUrl('assets/img/postcard-art.jpg');
   });
   return postcardArtPromise;

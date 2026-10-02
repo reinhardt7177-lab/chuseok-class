@@ -10,6 +10,16 @@
 # 주의 — 무료 등급은 15분간 요청이 없으면 잠든다. 다시 깨는 데 30초쯤 걸리므로
 #        수업 시작 몇 분 전에 주소를 한 번 열어 두면 좋다.
 #
+# 자동 배포는 끈다 (autoDeployTrigger: off).
+#   push할 때마다 서버가 다시 켜지면 열려 있던 수업방이 사라지고, 접속 중인 기기가 파일을 다시 받는다.
+#   2026-09-23 수업 시간에 그런 배포가 15번 있었다.
+#   올릴 때는 `npm run deploy:render` — 평일 한국 시간 08:30~15:00 에는 거절한다.
+#
+# 그림·음악은 이 서버가 내보내지 않고 GitHub Pages로 돌려보낸다 (server/asset-host.js).
+#   Render는 한 달 5GB를 넘으면 GB당 $0.15이고, 학급 하나가 그림·음악으로 약 383MB를 받는다.
+#   2026-09-23 하루에 238GB가 나가 약 $39가 청구됐다.
+#   ASSET_BASE 로 다른 곳(예: Cloudflare Pages)을 가리킬 수 있고, 빈 값이면 이 서버가 직접 낸다.
+#
 # 교실 수업은 교실 PC에서 `npm start` 로 켜는 쪽이 더 빠르고 안정적이다.
 # 인터넷이 끊겨도 돌아가고, 학생 기기가 같은 와이파이 안에 있으면 지연이 없다.
 
@@ -19,9 +29,13 @@ services:
     runtime: node
     plan: free
     region: singapore          # 한국에서 가장 가깝다
+    autoDeployTrigger: off     # push해도 다시 켜지지 않는다 — 위 설명 참고
     buildCommand: npm ci --omit=dev
     startCommand: node server/server.js
     healthCheckPath: /healthz      # 파일을 읽지 않는 가벼운 자리
     envVars:
       - key: NODE_VERSION
         value: "20"
+      # 그림·음악을 어디서 내려받게 할지. 안 적으면 이 저장소의 GitHub Pages.
+      # - key: ASSET_BASE
+      #   value: https://chuseok-class.pages.dev
